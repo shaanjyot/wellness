@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/database';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,14 +9,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'All required fields must be filled' }, { status: 400 });
     }
 
-    const result = db.prepare(`
-      INSERT INTO bookings (name, email, phone, service, date, time, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(name, email, phone, service, date, time, message || '');
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert([
+        {
+          name,
+          email,
+          phone,
+          service,
+          date,
+          time,
+          message: message || '',
+          status: 'pending'
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,
-      bookingId: result.lastInsertRowid
+      bookingId: data.id
     });
   } catch (error) {
     console.error('Create booking error:', error);

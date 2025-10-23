@@ -1,40 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/database';
-import { generateToken, comparePassword, verifyToken } from '@/lib/auth';
+import { authenticateAdmin } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();
+    console.log('📝 Login request received:', { username, passwordLength: password?.length });
 
     if (!username || !password) {
+      console.error('❌ Missing credentials');
       return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
 
-    const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username) as any;
+    console.log('🔐 Authenticating with:', username);
+    const result = await authenticateAdmin(username, password);
+    console.log('🎯 Auth result:', { success: result.success, error: result.error });
 
-    if (!admin) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!result.success) {
+      console.error('❌ Auth failed:', result.error);
+      return NextResponse.json({ error: result.error }, { status: 401 });
     }
 
-    const isValidPassword = await comparePassword(password, admin.password);
-
-    if (!isValidPassword) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-    }
-
-    const token = generateToken({ id: admin.id, username: admin.username });
-
-    const response = NextResponse.json({ success: true, token });
-    response.cookies.set('admin-token', token, {
+    console.log('✅ Auth successful, setting cookie');
+    const response = NextResponse.json({ success: true, token: result.token });
+    response.cookies.set('admin-token', result.token!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 24 * 60 * 60 // 24 hours
     });
 
+    console.log('✅ Login response sent');
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

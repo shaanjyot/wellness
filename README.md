@@ -15,7 +15,7 @@ A modern, responsive Next.js website for Wellness IV Drip, a mobile IV vitamin t
 
 ### Backend
 
-- **SQLite Database**: Lightweight database for storing bookings and admin data
+- **Supabase Database**: Cloud database for storing bookings and admin data
 - **JWT Authentication**: Secure admin login system
 - **RESTful API**: Complete API for booking management
 - **Admin Dashboard**: Full booking management interface
@@ -31,7 +31,7 @@ A modern, responsive Next.js website for Wellness IV Drip, a mobile IV vitamin t
 
 - **Frontend**: Next.js 14, React, TypeScript
 - **Styling**: Tailwind CSS with custom animations
-- **Database**: SQLite with better-sqlite3
+- **Database**: Supabase with PostgreSQL
 - **Authentication**: JWT with bcryptjs
 - **Calendar**: React Calendar
 - **Icons**: Lucide React
@@ -52,21 +52,29 @@ A modern, responsive Next.js website for Wellness IV Drip, a mobile IV vitamin t
    npm install
    ```
 
-3. **Set up environment variables**
+3. **Set up Supabase**
+
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Go to Settings > API to get your project URL and anon key
+   - Run the SQL schema from `supabase-schema.sql` in your Supabase SQL editor
+
+4. **Set up environment variables**
    Create a `.env.local` file in the root directory:
 
    ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    JWT_SECRET=your-secret-key-change-in-production
    NODE_ENV=development
    ```
 
-4. **Run the development server**
+5. **Run the development server**
 
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
+6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Default Admin Credentials

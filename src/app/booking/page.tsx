@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, User, Mail, Phone, MessageSquare, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Mail, CheckCircle } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
 
 type Value = Date | [Date, Date] | null;
 
@@ -100,15 +101,15 @@ export default function BookingPage() {
                 Booking Confirmed!
               </h1>
               <p className="text-xl text-gray-600 mb-8">
-                Thank you for booking with Wellness IV Drip. We'll contact you shortly to confirm your appointment details.
+                Thank you for booking with Wellness IV Drip. We will contact you shortly to confirm your appointment details.
               </p>
               <div className="space-y-4">
-                <a
+                <Link
                   href="/"
                   className="inline-block px-8 py-3 bg-gradient-to-r from-teal-500 to-amber-500 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-amber-600 transition-all duration-200"
                 >
                   Return Home
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -130,7 +131,7 @@ export default function BookingPage() {
           </h1>
           <p className="text-xl text-teal-100 max-w-3xl mx-auto">
             Schedule your personalized IV therapy session with our qualified nurses.
-            We'll come to you for maximum convenience.
+            We will come to you for maximum convenience.
           </p>
         </div>
       </section>
@@ -178,7 +179,13 @@ export default function BookingPage() {
               </h2>
               <div className="flex justify-center">
                 <Calendar
-                  onChange={setSelectedDate}
+                  onChange={(value) => {
+                    if (value instanceof Date) {
+                      setSelectedDate(value);
+                    } else if (Array.isArray(value) && value[0] instanceof Date) {
+                      setSelectedDate(value[0]);
+                    }
+                  }}
                   value={selectedDate}
                   minDate={new Date()}
                   className="react-calendar"

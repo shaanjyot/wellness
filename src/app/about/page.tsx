@@ -89,12 +89,12 @@ export default function AboutPage() {
           {activeTab === 'mission' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">Welcome to Canberra Mobile IV Drip Service</h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  At the heart of our mission is a genuine commitment to supporting individuals in their journey toward health and well-being. Whether you're recovering from physical exertion, dealing with jetlag, or feeling burnout, we offer treatments tailored to your needs.
+                  Wellness IV Drip offers mobile IV therapy services in Canberra, ACT, with a vision to deliver wellness and rejuvenation directly to the comfort of your home, providing you with ultimate convenience and flexibility.
                 </p>
                 <p className="text-lg text-gray-600 mb-8">
-                  With our advanced facility and experienced, qualified nurses, you can feel confident in the care you receive. We are an official licensee of IV League Drips, bringing you proven wellness solutions.
+                  Our mission is to offer customised IV nutrient therapy treatments and intramuscular boosters, tailored to each individual's unique health needs. We believe that true well-being is achieved by addressing the root causes of health challenges, and our dedicated team is here to empower you to take control of your wellness and live your best life.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
@@ -141,88 +141,82 @@ export default function AboutPage() {
           )}
 
           {activeTab === 'team' && (
-            <div>
+            <div className="max-w-4xl mx-auto">
               <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Vivian</h2>
                 <p className="text-xl text-gray-600">
-                  Experienced medical professionals dedicated to your wellness
+                  Our founder and dedicated Registered Nurse
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {teamMembers.map((member, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-8 shadow-lg text-center">
-                    <div className="text-6xl mb-4">{member.image}</div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
-                    <p className="text-teal-500 font-semibold mb-4">{member.role}</p>
-                    <p className="text-gray-600">{member.description}</p>
+              <div className="bg-white rounded-2xl p-8 shadow-lg">
+                <div className="text-center mb-8">
+                  <div className="text-8xl mb-6">{founder.image}</div>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-2">{founder.name}</h3>
+                  <p className="text-teal-500 font-semibold text-xl mb-6">{founder.role}</p>
+                </div>
+                <div className="space-y-6">
+                  <p className="text-lg text-gray-600 leading-relaxed">
+                    {founder.description}
+                  </p>
+                  <p className="text-lg text-gray-600 leading-relaxed">
+                    {founder.additionalInfo}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'process' && (
+            <div>
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">How Our IV Drips Work</h2>
+                <p className="text-xl text-gray-600">
+                  A simple, streamlined process designed for your comfort and convenience
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {processSteps.map((step, index) => (
+                  <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div className="text-4xl font-bold text-teal-500 mb-4">{step.number}</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {activeTab === 'values' && (
-            <div>
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
-                <p className="text-xl text-gray-600">
-                  The principles that guide everything we do
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {values.map((value, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-8 shadow-lg">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0">
-                        {value.icon}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
-                        <p className="text-gray-600">{value.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'partnership' && (
+          {activeTab === 'contact' && (
             <div className="text-center">
               <div className="bg-white rounded-2xl p-12 shadow-lg max-w-4xl mx-auto">
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">IV League Drips Partnership</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">Contact Us</h2>
                 <p className="text-xl text-gray-600 mb-8">
-                  We are proud to be an official licensee of IV League Drips, Australia's leading mobile IV therapy service. This partnership ensures that our clients receive the highest quality treatments backed by years of research and development.
+                  For more information, feel free to reach out to our dedicated team — we're here to assist you.
                 </p>
-                <div className="bg-gradient-to-r from-teal-50 to-amber-50 rounded-lg p-8 mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">What This Means for You</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="w-6 h-6 text-teal-500" />
-                      <span className="text-gray-700">Proven treatment protocols</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="w-6 h-6 text-teal-500" />
-                      <span className="text-gray-700">Premium quality ingredients</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="w-6 h-6 text-teal-500" />
-                      <span className="text-gray-700">Ongoing training and support</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="w-6 h-6 text-teal-500" />
-                      <span className="text-gray-700">Continuous innovation</span>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                  <div className="bg-gradient-to-r from-teal-50 to-amber-50 rounded-lg p-6">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Phone</h3>
+                    <p className="text-xl text-teal-600 font-semibold">0450 480 698</p>
+                  </div>
+                  <div className="bg-gradient-to-r from-teal-50 to-amber-50 rounded-lg p-6">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Email</h3>
+                    <p className="text-xl text-teal-600 font-semibold">admin@wellnessivdrip.com.au</p>
                   </div>
                 </div>
-                <a
-                  href="https://ivleaguedrips.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-teal-500 to-amber-500 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-amber-600 transition-all duration-200"
-                >
-                  Learn More About IV League Drips
-                </a>
+                <div className="space-y-4">
+                  <a
+                    href="/booking"
+                    className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-teal-500 to-amber-500 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-amber-600 transition-all duration-200 mr-4"
+                  >
+                    Book Appointment
+                  </a>
+                  <a
+                    href="/contact"
+                    className="inline-flex items-center px-8 py-4 border-2 border-teal-500 text-teal-500 font-semibold rounded-lg hover:bg-teal-500 hover:text-white transition-all duration-200"
+                  >
+                    Contact Us
+                  </a>
+                </div>
               </div>
             </div>
           )}

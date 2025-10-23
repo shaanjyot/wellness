@@ -24,7 +24,7 @@ export default function Footer() {
             </div>
             <p className="text-gray-300 mb-6 max-w-md">
               Mobile IV Vitamin Therapy Service delivering bespoke IV drips in comfort.
-              We're an official licensee of IV League Drips, bringing you premium wellness solutions.
+              Were an official licensee of IV League Drips, bringing you premium wellness solutions.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-teal-400 transition-colors">
@@ -79,7 +79,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © 2025 The Explorer. Developed by Shantanu Goswami
+            © 2025 Wellness IV Drip. Copyright protected.
           </p>
         </div>
       </div>

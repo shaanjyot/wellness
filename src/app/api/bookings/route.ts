@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/database';
+import { supabase } from '@/lib/supabase';
 import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -16,10 +16,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const bookings = db.prepare(`
-      SELECT * FROM bookings
-      ORDER BY created_at DESC
-    `).all();
+    const { data: bookings, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({ bookings });
   } catch (error) {
@@ -48,11 +52,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID and status are required' }, { status: 400 });
     }
 
-    db.prepare(`
-      UPDATE bookings
-      SET status = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(status, id);
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
