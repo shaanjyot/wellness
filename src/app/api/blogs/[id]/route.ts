@@ -12,15 +12,19 @@ export async function GET(
     // Check if id is a number (ID) or string (slug)
     const isNumeric = /^\d+$/.test(id);
 
-    let query = supabase
-      .from('blogs')
-      .select('*')
-      .single();
-
+    let query;
     if (isNumeric) {
-      query = query.eq('id', parseInt(id));
+      query = supabase
+        .from('blogs')
+        .select('*')
+        .eq('id', parseInt(id))
+        .single();
     } else {
-      query = query.eq('slug', id);
+      query = supabase
+        .from('blogs')
+        .select('*')
+        .eq('slug', id)
+        .single();
     }
 
     const { data: blog, error } = await query;
@@ -58,7 +62,7 @@ export async function PUT(
       .replace(/-+/g, '-')
       .trim('-');
 
-    const updateData = {
+    const updateData: Record<string, string | string[] | undefined> = {
       title,
       slug,
       excerpt: excerpt || '',
