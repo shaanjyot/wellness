@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import StepsNavigation from './StepsNavigation';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -17,20 +16,6 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
   }, []);
 
   useEffect(() => {
@@ -61,19 +46,6 @@ export default function Header() {
     };
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
-
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/services', label: 'Services' },
@@ -84,11 +56,10 @@ export default function Header() {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled
-        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg'
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+        ? 'bg-white/95 backdrop-blur-md shadow-lg'
         : 'bg-transparent'
-    }`}>
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -106,11 +77,10 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`font-medium transition-colors duration-200 ${
-                  isScrolled
-                    ? 'text-gray-700 dark:text-gray-300 hover:text-teal-500 dark:hover:text-teal-400'
+                className={`font-medium transition-colors duration-200 ${isScrolled
+                    ? 'text-gray-700 hover:text-teal-500'
                     : 'text-white hover:text-teal-300'
-                }`}
+                  }`}
               >
                 {item.label}
               </Link>
@@ -118,51 +88,23 @@ export default function Header() {
             {isAdminLoggedIn && (
               <Link
                 href="/secure-access/admin"
-                className={`font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
-                  isScrolled
+                className={`font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${isScrolled
                     ? 'text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg'
                     : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm'
-                }`}
+                  }`}
               >
                 Admin Dashboard
               </Link>
             )}
             <StepsNavigation />
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                isScrolled
-                  ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                  : 'text-white hover:bg-white/10'
-              }`}
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
           </nav>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* Mobile Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                isScrolled
-                  ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                  : 'text-white hover:bg-white/10'
-              }`}
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`p-2 rounded-lg transition-colors ${
-                isScrolled ? 'text-gray-700 dark:text-gray-300' : 'text-white'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
+                }`}
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -171,17 +113,16 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200/20 dark:border-gray-700/20">
+          <div className="md:hidden py-4 border-t border-gray-200/20">
             <nav className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`font-medium transition-colors duration-200 ${
-                    isScrolled
-                      ? 'text-gray-700 dark:text-gray-300 hover:text-teal-500 dark:hover:text-teal-400'
+                  className={`font-medium transition-colors duration-200 ${isScrolled
+                      ? 'text-gray-700 hover:text-teal-500'
                       : 'text-white hover:text-teal-300'
-                  }`}
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -190,11 +131,10 @@ export default function Header() {
               {isAdminLoggedIn && (
                 <Link
                   href="/secure-access/admin"
-                  className={`font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
-                    isScrolled
+                  className={`font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${isScrolled
                       ? 'text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg'
                       : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm'
-                  }`}
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Admin Dashboard

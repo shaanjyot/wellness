@@ -4,9 +4,19 @@ import { useState } from 'react';
 import { CheckCircle, Users, Award, Heart, Phone, Mail, MapPin, Clock } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { usePageContent } from '@/hooks/usePageContent';
 
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState('mission');
+  const { content, loading } = usePageContent('about');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+      </div>
+    );
+  }
 
   const tabs = [
     { id: 'mission', label: 'Our Mission' },
@@ -15,13 +25,22 @@ export default function AboutPage() {
     { id: 'contact', label: 'Contact Us' }
   ];
 
-  const founder = {
-    name: 'Vivian',
-    role: 'Founder & Registered Nurse',
-    image: '👩‍⚕️',
-    description: 'Our founder, Vivian, is a Registered Nurse with a deep passion for educating others on maintaining optimal health through nutritious vitamin IV therapy and illness prevention. After receiving training from leading IV drip experts in Sydney, Vivian set out to establish Wellness IV in Canberra, drawing on years of experience as a dedicated nurse.',
-    additionalInfo: 'Inspired by the growing recognition and success of IV vitamin therapies both nationally and internationally, Vivian was determined to bring this transformative wellness solution to the people of Canberra, helping them on their journey to better health.'
-  };
+  /*
+   Fallback hardcoded data structure mirrors what we expect from CMS.
+   In a real app, we might just return empty states or error if content is missing,
+   but here we keep robust fallbacks or simple checks.
+  */
+
+  const missionData = content?.sections?.['mission_tab'] || {};
+  const teamData = content?.sections?.['team_tab'] || {};
+
+  // Re-use home page 'how_it_works' logic or if we stored it specifically for about page
+  // In seed script, we didn't add 'process' section for 'about' page specifically,
+  // but often 'How It Works' is same across site.
+  // Let's actually check if we added it to 'about' in seed script...
+  // Wait, I only added 'mission_tab' and 'team_tab' for 'about' in previous step.
+  // So 'process' and 'contact' might need to be hardcoded or fetched from 'home' page content if duplicated?
+  // Or better, for now I will keep the hardcoded processSteps as fallback if not in CMS.
 
   const processSteps = [
     {
@@ -70,11 +89,10 @@ export default function AboutPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-teal-500 text-white'
-                    : 'text-gray-600 hover:text-teal-500 hover:bg-teal-50'
-                }`}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${activeTab === tab.id
+                  ? 'bg-teal-500 text-white'
+                  : 'text-gray-600 hover:text-teal-500 hover:bg-teal-50'
+                  }`}
               >
                 {tab.label}
               </button>
@@ -89,52 +107,43 @@ export default function AboutPage() {
           {activeTab === 'mission' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">Welcome to Canberra Mobile IV Drip Service</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">{missionData.title || 'Welcome to Canberra Mobile IV Drip Service'}</h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  Wellness IV Drip offers mobile IV therapy services in Canberra, ACT, with a vision to deliver wellness and rejuvenation directly to the comfort of your home, providing you with ultimate convenience and flexibility.
+                  {missionData.intro || 'Wellness IV Drip offers mobile IV therapy services...'}
                 </p>
                 <p className="text-lg text-gray-600 mb-8">
-                  Our mission is to offer customised IV nutrient therapy treatments and intramuscular boosters, tailored to each individual's unique health needs. We believe that true well-being is achieved by addressing the root causes of health challenges, and our dedicated team is here to empower you to take control of your wellness and live your best life.
+                  {missionData.mission || 'Our mission is to offer customised IV nutrient therapy...'}
                 </p>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-6 h-6 text-teal-500" />
-                    <span className="text-gray-700 font-semibold">Qualified Medical Professionals</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-6 h-6 text-teal-500" />
-                    <span className="text-gray-700 font-semibold">Official IV League Drips Licensee</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-6 h-6 text-teal-500" />
-                    <span className="text-gray-700 font-semibold">Mobile Service Across Canberra</span>
-                  </div>
+                  {(missionData.highlights || []).map((highlight: string, idx: number) => (
+                    <div key={idx} className="flex items-center space-x-3">
+                      <CheckCircle className="w-6 h-6 text-teal-500" />
+                      <span className="text-gray-700 font-semibold">{highlight}</span>
+                    </div>
+                  ))}
+                  {(!missionData.highlights || missionData.highlights.length === 0) && (
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="w-6 h-6 text-teal-500" />
+                      <span className="text-gray-700 font-semibold">Qualified Medical Professionals</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="bg-gradient-to-r from-teal-400 to-amber-400 rounded-2xl p-8 text-white">
                 <h3 className="text-2xl font-bold mb-6">Why Choose Us?</h3>
                 <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-white rounded-full mt-2"></div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Convenience</h4>
-                      <p className="text-teal-100">We come to you, saving you time and travel.</p>
+                  {(missionData.why_choose_us || []).map((item: any, idx: number) => (
+                    <div key={idx} className="flex items-start space-x-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2"></div>
+                      <div>
+                        <h4 className="font-semibold mb-1">{item.title}</h4>
+                        <p className="text-teal-100">{item.description}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-white rounded-full mt-2"></div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Expertise</h4>
-                      <p className="text-teal-100">Qualified nurses with specialized IV therapy training.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-white rounded-full mt-2"></div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Personalized Care</h4>
-                      <p className="text-teal-100">Each treatment is customized to your specific needs.</p>
-                    </div>
-                  </div>
+                  ))}
+                  {(!missionData.why_choose_us || missionData.why_choose_us.length === 0) && (
+                    <p className="text-teal-100">Contact us for details.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -143,26 +152,30 @@ export default function AboutPage() {
           {activeTab === 'team' && (
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Vivian</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">{teamData.title || 'Meet Vivian'}</h2>
                 <p className="text-xl text-gray-600">
-                  Our founder and dedicated Registered Nurse
+                  {teamData.subtitle || 'Our founder and dedicated Registered Nurse'}
                 </p>
               </div>
-              <div className="bg-white rounded-2xl p-8 shadow-lg">
-                <div className="text-center mb-8">
-                  <div className="text-8xl mb-6">{founder.image}</div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-2">{founder.name}</h3>
-                  <p className="text-teal-500 font-semibold text-xl mb-6">{founder.role}</p>
+              {teamData.founder ? (
+                <div className="bg-white rounded-2xl p-8 shadow-lg">
+                  <div className="text-center mb-8">
+                    <div className="text-8xl mb-6">👩‍⚕️</div>
+                    <h3 className="text-3xl font-bold text-gray-900 mb-2">{teamData.founder.name}</h3>
+                    <p className="text-teal-500 font-semibold text-xl mb-6">{teamData.founder.role}</p>
+                  </div>
+                  <div className="space-y-6">
+                    <p className="text-lg text-gray-600 leading-relaxed">
+                      {teamData.founder.description}
+                    </p>
+                    <p className="text-lg text-gray-600 leading-relaxed">
+                      {teamData.founder.additional_info}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-6">
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    {founder.description}
-                  </p>
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    {founder.additionalInfo}
-                  </p>
-                </div>
-              </div>
+              ) : (
+                <div className="text-center text-gray-500">Founder information not available.</div>
+              )}
             </div>
           )}
 

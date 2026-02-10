@@ -4,143 +4,36 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, CheckCircle, Star } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { usePageContent } from '@/hooks/usePageContent';
 
 export default function ServicesPage() {
   const [openSection, setOpenSection] = useState<string | null>('includes');
+  const { content, loading } = usePageContent('services');
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
   };
 
-  const services = [
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+      </div>
+    );
+  }
+
+  const servicesList = content?.sections?.['services_list']?.services || [];
+
+  // Fallbacks if CMS is empty (safety net)
+  const services = servicesList.length > 0 ? servicesList : [
     {
       id: 'hydration',
       name: 'Hydration Therapy',
       price: '$120',
       duration: '30-45 min',
       description: 'Perfect for dehydration, hangovers, and general wellness',
-      includes: [
-        'Normal Saline Solution',
-        'B-Complex Vitamins',
-        'Vitamin C',
-        'Magnesium',
-        'Zinc'
-      ],
-      specs: {
-        'Volume': '500ml',
-        'Duration': '30-45 minutes',
-        'Best For': 'Dehydration, Hangovers, General Wellness',
-        'Side Effects': 'Minimal - slight bruising possible'
-      }
-    },
-    {
-      id: 'energy',
-      name: 'Energy Boost',
-      price: '$150',
-      duration: '45-60 min',
-      description: 'Combat fatigue and boost your energy levels naturally',
-      includes: [
-        'Normal Saline Solution',
-        'B-Complex Vitamins',
-        'Vitamin C',
-        'Magnesium',
-        'Taurine',
-        'Glutathione'
-      ],
-      specs: {
-        'Volume': '750ml',
-        'Duration': '45-60 minutes',
-        'Best For': 'Fatigue, Low Energy, Mental Clarity',
-        'Side Effects': 'Minimal - slight bruising possible'
-      }
-    },
-    {
-      id: 'immunity',
-      name: 'Immunity Support',
-      price: '$180',
-      duration: '45-60 min',
-      description: 'Strengthen your immune system with essential vitamins',
-      includes: [
-        'Normal Saline Solution',
-        'High-dose Vitamin C',
-        'Zinc',
-        'Selenium',
-        'Vitamin D',
-        'Glutathione'
-      ],
-      specs: {
-        'Volume': '750ml',
-        'Duration': '45-60 minutes',
-        'Best For': 'Immune Support, Cold Prevention, Recovery',
-        'Side Effects': 'Minimal - slight bruising possible'
-      }
-    },
-    {
-      id: 'beauty',
-      name: 'Beauty Glow',
-      price: '$200',
-      duration: '60 min',
-      description: 'Enhance your skin, hair, and nails from within',
-      includes: [
-        'Normal Saline Solution',
-        'Biotin',
-        'Collagen Peptides',
-        'Vitamin C',
-        'Glutathione',
-        'Selenium'
-      ],
-      specs: {
-        'Volume': '1000ml',
-        'Duration': '60 minutes',
-        'Best For': 'Skin Health, Hair Growth, Anti-aging',
-        'Side Effects': 'Minimal - slight bruising possible'
-      }
-    },
-    {
-      id: 'athletic',
-      name: 'Athletic Recovery',
-      price: '$220',
-      duration: '60-75 min',
-      description: 'Optimize recovery and performance for athletes',
-      includes: [
-        'Normal Saline Solution',
-        'B-Complex Vitamins',
-        'Magnesium',
-        'Zinc',
-        'Glutathione',
-        'Amino Acids',
-        'Electrolytes'
-      ],
-      specs: {
-        'Volume': '1000ml',
-        'Duration': '60-75 minutes',
-        'Best For': 'Athletic Recovery, Muscle Repair, Performance',
-        'Side Effects': 'Minimal - slight bruising possible'
-      }
-    },
-    {
-      id: 'premium',
-      name: 'Premium Wellness',
-      price: '$280',
-      duration: '75-90 min',
-      description: 'Our most comprehensive treatment for complete wellness',
-      includes: [
-        'Normal Saline Solution',
-        'All B-Vitamins',
-        'High-dose Vitamin C',
-        'Magnesium',
-        'Zinc',
-        'Selenium',
-        'Glutathione',
-        'NAD+',
-        'Amino Acids'
-      ],
-      specs: {
-        'Volume': '1000ml',
-        'Duration': '75-90 minutes',
-        'Best For': 'Complete Wellness, Anti-aging, Peak Performance',
-        'Side Effects': 'Minimal - slight bruising possible'
-      }
+      includes: ['Normal Saline Solution', 'B-Complex Vitamins', 'Vitamin C', 'Magnesium', 'Zinc'],
+      specs: { 'Volume': '500ml', 'Duration': '30-45 minutes', 'Best For': 'Dehydration', 'Side Effects': 'Minimal' }
     }
   ];
 
@@ -187,15 +80,15 @@ export default function ServicesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              IV Drip Treatments
+              {content?.sections?.['services_list']?.title || 'IV Drip Treatments'}
             </h2>
             <p className="text-xl text-gray-600">
-              Professional vitamin therapy delivered by qualified nurses
+              {content?.sections?.['services_list']?.subtitle || 'Professional vitamin therapy delivered by qualified nurses'}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {services.map((service) => (
+            {services.map((service: any) => (
               <div key={service.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="p-8">
                   <div className="flex justify-between items-start mb-4">
@@ -227,7 +120,7 @@ export default function ServicesPage() {
                       {openSection === `${service.id}-includes` && (
                         <div className="px-4 pb-4">
                           <ul className="space-y-2">
-                            {service.includes.map((item, index) => (
+                            {(service.includes || []).map((item: string, index: number) => (
                               <li key={index} className="flex items-center space-x-2">
                                 <CheckCircle className="w-4 h-4 text-teal-500" />
                                 <span className="text-gray-700">{item}</span>
@@ -254,10 +147,10 @@ export default function ServicesPage() {
                       {openSection === `${service.id}-specs` && (
                         <div className="px-4 pb-4">
                           <div className="grid grid-cols-2 gap-2">
-                            {Object.entries(service.specs).map(([key, value]) => (
+                            {Object.entries(service.specs || {}).map(([key, value]) => (
                               <div key={key} className="flex justify-between">
                                 <span className="text-gray-600 font-medium">{key}:</span>
-                                <span className="text-gray-900">{value}</span>
+                                <span className="text-gray-900">{String(value)}</span>
                               </div>
                             ))}
                           </div>

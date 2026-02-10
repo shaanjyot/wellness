@@ -408,25 +408,30 @@ export default function AdminDashboard() {
             <nav className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => setActiveTab('bookings')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === 'bookings'
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'bookings'
                     ? 'bg-teal-600 text-white shadow-lg'
                     : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <CalendarIcon className="w-5 h-5 inline mr-2" />
                 Bookings
               </button>
               <button
                 onClick={() => setActiveTab('blogs')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === 'blogs'
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'blogs'
                     ? 'bg-teal-600 text-white shadow-lg'
                     : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <BookOpen className="w-5 h-5 inline mr-2" />
                 Blog Management
+              </button>
+              <button
+                onClick={() => router.push('/secure-access/admin/cms')}
+                className="px-4 py-2 rounded-lg font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200"
+              >
+                <Edit className="w-5 h-5 inline mr-2" />
+                CMS Content
               </button>
             </nav>
 
@@ -443,22 +448,20 @@ export default function AdminDashboard() {
             <nav className="flex space-x-4">
               <button
                 onClick={() => setActiveTab('bookings')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === 'bookings'
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'bookings'
                     ? 'bg-teal-600 text-white shadow-lg'
                     : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <CalendarIcon className="w-5 h-5 inline mr-2" />
                 Bookings
               </button>
               <button
                 onClick={() => setActiveTab('blogs')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === 'blogs'
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'blogs'
                     ? 'bg-teal-600 text-white shadow-lg'
                     : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <BookOpen className="w-5 h-5 inline mr-2" />
                 Blog Management
@@ -479,135 +482,135 @@ export default function AdminDashboard() {
               <p className="text-gray-600">Manage all appointment bookings and their status</p>
             </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg p-6 shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="w-6 h-6 text-yellow-600" />
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <Clock className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {bookings.filter(b => b.status === 'pending').length}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {bookings.filter(b => b.status === 'pending').length}
-                </p>
+
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Confirmed</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {bookings.filter(b => b.status === 'confirmed').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <CalendarIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Completed</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {bookings.filter(b => b.status === 'completed').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-lg">
+                    <XCircle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Cancelled</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {bookings.filter(b => b.status === 'cancelled').length}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg p-6 shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+            {/* Bookings Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">All Bookings</h3>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Confirmed</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {bookings.filter(b => b.status === 'confirmed').length}
-                </p>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Service
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date & Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {bookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{booking.name}</div>
+                            <div className="text-sm text-gray-500">{booking.email}</div>
+                            <div className="text-sm text-gray-500">{booking.phone}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{getServiceName(booking.service)}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {new Date(booking.date).toLocaleDateString()}
+                          </div>
+                          <div className="text-sm text-gray-500">{booking.time}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <select
+                              value={booking.status}
+                              onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
+                              className="text-xs border border-gray-300 rounded px-2 py-1"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="confirmed">Confirmed</option>
+                              <option value="completed">Completed</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CalendarIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {bookings.filter(b => b.status === 'completed').length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XCircle className="w-6 h-6 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Cancelled</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {bookings.filter(b => b.status === 'cancelled').length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bookings Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">All Bookings</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Service
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date & Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{booking.name}</div>
-                        <div className="text-sm text-gray-500">{booking.email}</div>
-                        <div className="text-sm text-gray-500">{booking.phone}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{getServiceName(booking.service)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(booking.date).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">{booking.time}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <select
-                          value={booking.status}
-                          onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
-                          className="text-xs border border-gray-300 rounded px-2 py-1"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
             {bookings.length === 0 && (
               <div className="text-center py-12">
@@ -764,9 +767,8 @@ export default function AdminDashboard() {
                               />
                               <label
                                 htmlFor="featured-image-upload"
-                                className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
-                                  isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''
+                                  }`}
                               >
                                 {isUploadingImage ? (
                                   <>
@@ -899,11 +901,10 @@ export default function AdminDashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            blog.status === 'published' ? 'bg-green-100 text-green-800' :
-                            blog.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${blog.status === 'published' ? 'bg-green-100 text-green-800' :
+                              blog.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                            }`}>
                             {blog.status}
                           </span>
                         </td>

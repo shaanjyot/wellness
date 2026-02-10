@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { usePageContent } from '@/hooks/usePageContent';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { content, loading } = usePageContent('contact');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -36,34 +38,49 @@ export default function ContactPage() {
     }, 1000);
   };
 
-  const contactInfo = [
+  const iconMap = {
+    'Phone': <Phone className="w-6 h-6 text-teal-500" />,
+    'Mail': <Mail className="w-6 h-6 text-teal-500" />,
+    'MapPin': <MapPin className="w-6 h-6 text-teal-500" />,
+    'Clock': <Clock className="w-6 h-6 text-teal-500" />
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+      </div>
+    );
+  }
+
+  const contactInfoList = content?.sections?.['contact_info']?.info_cards || [
     {
-      icon: <Phone className="w-6 h-6 text-teal-500" />,
+      icon: 'Phone',
       title: 'Phone',
       details: '0450 480 698',
       description: 'Call us for immediate assistance'
     },
     {
-      icon: <Mail className="w-6 h-6 text-teal-500" />,
+      icon: 'Mail',
       title: 'Email',
       details: 'admin@wellnessivdrip.com.au',
       description: 'Send us an email anytime'
     },
     {
-      icon: <MapPin className="w-6 h-6 text-teal-500" />,
+      icon: 'MapPin',
       title: 'Service Area',
       details: 'Canberra & Surrounding Areas',
       description: 'We come to you anywhere in Canberra'
     },
     {
-      icon: <Clock className="w-6 h-6 text-teal-500" />,
+      icon: 'Clock',
       title: 'Hours',
       details: '7 Days a Week',
       description: 'Flexible scheduling available'
     }
   ];
 
-  const faqs = [
+  const faqs = content?.sections?.['faqs']?.questions || [
     {
       question: 'How does the mobile IV service work?',
       answer: 'Our qualified nurses come to your location with all necessary equipment. We conduct a brief consultation, then administer your chosen IV treatment in the comfort of your own space.'
@@ -140,10 +157,10 @@ export default function ContactPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            {contactInfo.map((info, index) => (
+            {contactInfoList.map((info: any, index: number) => (
               <div key={index} className="text-center p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-all duration-300">
                 <div className="flex justify-center mb-4">
-                  {info.icon}
+                  {iconMap[info.icon as keyof typeof iconMap] || <CheckCircle className="w-6 h-6 text-teal-500" />}
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{info.title}</h3>
                 <p className="text-teal-600 font-semibold mb-2">{info.details}</p>
@@ -313,15 +330,15 @@ export default function ContactPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
+              {content?.sections?.['faqs']?.title || 'Frequently Asked Questions'}
             </h2>
             <p className="text-xl text-gray-600">
-              Common questions about our IV therapy services
+              {content?.sections?.['faqs']?.subtitle || 'Common questions about our IV therapy services'}
             </p>
           </div>
 
           <div className="space-y-6">
-            {faqs.map((faq, index) => (
+            {faqs.map((faq: any, index: number) => (
               <div key={index} className="bg-gray-50 rounded-2xl p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">{faq.question}</h3>
                 <p className="text-gray-600">{faq.answer}</p>
