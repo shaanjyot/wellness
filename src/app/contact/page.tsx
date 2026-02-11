@@ -30,12 +30,28 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitted(true);
+    try {
+      const response = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Failed to send message. Please check your connection and try again.');
+    } finally {
       setIsSubmitting(false);
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    }, 1000);
+    }
   };
 
   const iconMap = {

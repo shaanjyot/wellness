@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Calendar as CalendarIcon, Clock, CheckCircle, XCircle, BookOpen, Plus, Edit, Trash2, Eye as ViewIcon, Upload, X } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, CheckCircle, XCircle, BookOpen, Plus, Edit, Trash2, Eye as ViewIcon, Upload, X, MessageSquare } from 'lucide-react';
 import RichTextEditor from '@/components/RichTextEditor';
 
 interface Blog {
@@ -36,16 +36,29 @@ interface Booking {
   updated_at: string;
 }
 
+interface ContactSubmission {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  status: 'new' | 'read' | 'replied' | 'archived';
+  created_at: string;
+  updated_at: string;
+}
+
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'bookings' | 'blogs'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'blogs' | 'contact'>('bookings');
   const [showBlogForm, setShowBlogForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [blogForm, setBlogForm] = useState({
@@ -68,6 +81,13 @@ export default function AdminDashboard() {
   const [bookingsCurrentPage, setBookingsCurrentPage] = useState(1);
   const [bookingsPerPage] = useState(10);
 
+  // Contact submissions filters, sorting, and pagination
+  const [contactStatusFilter, setContactStatusFilter] = useState<string>('all');
+  const [contactSearchTerm, setContactSearchTerm] = useState('');
+  const [contactSortOrder, setContactSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [contactCurrentPage, setContactCurrentPage] = useState(1);
+  const [contactPerPage] = useState(10);
+
   const router = useRouter();
 
   const checkAuth = useCallback(async () => {
@@ -77,6 +97,7 @@ export default function AdminDashboard() {
         setIsAuthenticated(true);
         fetchBookings();
         fetchBlogs();
+        fetchContactSubmissions();
       } else {
         setIsAuthenticated(false);
       }
@@ -110,6 +131,7 @@ export default function AdminDashboard() {
         setIsAuthenticated(true);
         fetchBookings();
         fetchBlogs();
+        fetchContactSubmissions();
       } else {
         const errorData = await response.json();
         setLoginError(errorData.error || 'Login failed');
@@ -145,6 +167,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchContactSubmissions = async () => {
+    try {
+      const response = await fetch('/api/contact');
+      if (response.ok) {
+        const data = await response.json();
+        setContactSubmissions(data.submissions);
+      }
+    } catch (error) {
+      console.error('Failed to fetch contact submissions:', error);
+    }
+  };
+
   const updateBookingStatus = async (id: number, status: string) => {
     try {
       const response = await fetch('/api/bookings', {
@@ -162,6 +196,42 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to update booking status:', error);
+    }
+  };
+
+  const updateContactSubmissionStatus = async (id: number, status: string) => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, status }),
+      });
+
+      if (response.ok) {
+        setContactSubmissions(contactSubmissions.map(sub =>
+          sub.id === id ? { ...sub, status: status as any } : sub
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to update contact submission status:', error);
+    }
+  };
+
+  const deleteContactSubmission = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this submission?')) return;
+
+    try {
+      const response = await fetch(`/api/contact?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setContactSubmissions(contactSubmissions.filter(sub => sub.id !== id));
+      }
+    } catch (error) {
+      console.error('Failed to delete contact submission:', error);
     }
   };
 
@@ -373,11 +443,16 @@ export default function AdminDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
+      case 'read':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
+      case 'archived':
         return 'bg-red-100 text-red-800';
       case 'completed':
+      case 'replied':
         return 'bg-blue-100 text-blue-800';
+      case 'new':
+      case 'pending':
       default:
         return 'bg-yellow-100 text-yellow-800';
     }
@@ -436,6 +511,16 @@ export default function AdminDashboard() {
                 Blog Management
               </button>
               <button
+                onClick={() => setActiveTab('contact')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'contact'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  }`}
+              >
+                <MessageSquare className="w-5 h-5 inline mr-2" />
+                Contact Submissions
+              </button>
+              <button
                 onClick={() => router.push('/secure-access/admin/cms')}
                 className="px-4 py-2 rounded-lg font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200"
               >
@@ -474,6 +559,16 @@ export default function AdminDashboard() {
               >
                 <BookOpen className="w-5 h-5 inline mr-2" />
                 Blog Management
+              </button>
+              <button
+                onClick={() => setActiveTab('contact')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'contact'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  }`}
+              >
+                <MessageSquare className="w-5 h-5 inline mr-2" />
+                Contact
               </button>
             </nav>
           </div>
@@ -1145,6 +1240,275 @@ export default function AdminDashboard() {
                 <p className="text-gray-500">Create your first blog post to get started.</p>
               </div>
             )}
+          </>
+        )}
+
+        {/* Contact Submissions Tab */}
+        {activeTab === 'contact' && (
+          <>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Contact Submissions</h2>
+              <p className="text-gray-600">View and manage messages from your customers</p>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <MessageSquare className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">New Messages</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {contactSubmissions.filter(s => s.status === 'new').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Read</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {contactSubmissions.filter(s => s.status === 'read').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Edit className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Replied</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {contactSubmissions.filter(s => s.status === 'replied').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-lg">
+                    <Trash2 className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Archived</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {contactSubmissions.filter(s => s.status === 'archived').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filters and Search */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, or message..."
+                    value={contactSearchTerm}
+                    onChange={(e) => {
+                      setContactSearchTerm(e.target.value);
+                      setContactCurrentPage(1);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    value={contactStatusFilter}
+                    onChange={(e) => {
+                      setContactStatusFilter(e.target.value);
+                      setContactCurrentPage(1);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="new">New</option>
+                    <option value="read">Read</option>
+                    <option value="replied">Replied</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Sort Order</label>
+                  <button
+                    onClick={() => setContactSortOrder(contactSortOrder === 'asc' ? 'desc' : 'asc')}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-between"
+                  >
+                    <span>{contactSortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
+                    <span>{contactSortOrder === 'asc' ? '↑' : '↓'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Submissions Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {(() => {
+                      let filtered = [...contactSubmissions];
+                      if (contactStatusFilter !== 'all') {
+                        filtered = filtered.filter(s => s.status === contactStatusFilter);
+                      }
+                      if (contactSearchTerm) {
+                        const search = contactSearchTerm.toLowerCase();
+                        filtered = filtered.filter(s =>
+                          s.name.toLowerCase().includes(search) ||
+                          s.email.toLowerCase().includes(search) ||
+                          s.message.toLowerCase().includes(search)
+                        );
+                      }
+
+                      filtered.sort((a, b) => {
+                        const dateA = new Date(a.created_at).getTime();
+                        const dateB = new Date(b.created_at).getTime();
+                        return contactSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+                      });
+
+                      const startIndex = (contactCurrentPage - 1) * contactPerPage;
+                      const paginated = filtered.slice(startIndex, startIndex + contactPerPage);
+
+                      if (paginated.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                              <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                              <p>No submissions found</p>
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return paginated.map((sub) => (
+                        <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{sub.name}</div>
+                            <div className="text-sm text-gray-500">{sub.email}</div>
+                            {sub.phone && <div className="text-xs text-gray-400">{sub.phone}</div>}
+                          </td>
+                          <td className="px-6 py-4">
+                            {sub.subject && <div className="text-xs font-bold text-gray-600 mb-1">{sub.subject}</div>}
+                            <div className="text-sm text-gray-900 line-clamp-2 max-w-xs" title={sub.message}>
+                              {sub.message}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(sub.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(sub.status)}`}>
+                              {sub.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex items-center space-x-3">
+                              <select
+                                value={sub.status}
+                                onChange={(e) => updateContactSubmissionStatus(sub.id, e.target.value)}
+                                className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-teal-500 focus:border-teal-500"
+                              >
+                                <option value="new">New</option>
+                                <option value="read">Read</option>
+                                <option value="replied">Replied</option>
+                                <option value="archived">Archived</option>
+                              </select>
+                              <button
+                                onClick={() => deleteContactSubmission(sub.id)}
+                                className="text-red-600 hover:text-red-900"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ));
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {(() => {
+                let filtered = contactSubmissions;
+                if (contactStatusFilter !== 'all') {
+                  filtered = filtered.filter(s => s.status === contactStatusFilter);
+                }
+                if (contactSearchTerm) {
+                  const search = contactSearchTerm.toLowerCase();
+                  filtered = filtered.filter(s =>
+                    s.name.toLowerCase().includes(search) ||
+                    s.email.toLowerCase().includes(search) ||
+                    s.message.toLowerCase().includes(search)
+                  );
+                }
+                const totalPages = Math.ceil(filtered.length / contactPerPage);
+                if (totalPages <= 1) return null;
+
+                return (
+                  <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing {((contactCurrentPage - 1) * contactPerPage) + 1} to {Math.min(contactCurrentPage * contactPerPage, filtered.length)} of {filtered.length} results
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setContactCurrentPage(Math.max(1, contactCurrentPage - 1))}
+                        disabled={contactCurrentPage === 1}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setContactCurrentPage(page)}
+                          className={`px-3 py-1 border rounded-lg ${page === contactCurrentPage
+                            ? 'bg-teal-600 text-white border-teal-600'
+                            : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => setContactCurrentPage(Math.min(totalPages, contactCurrentPage + 1))}
+                        disabled={contactCurrentPage === totalPages}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           </>
         )}
       </main>
