@@ -59,6 +59,15 @@ export default function AdminDashboard() {
     author: 'Admin'
   });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Bookings filters, sorting, and pagination
+  const [bookingsStatusFilter, setBookingsStatusFilter] = useState<string>('all');
+  const [bookingsSearchTerm, setBookingsSearchTerm] = useState('');
+  const [bookingsSortBy, setBookingsSortBy] = useState<'date' | 'name' | 'created'>('created');
+  const [bookingsSortOrder, setBookingsSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [bookingsCurrentPage, setBookingsCurrentPage] = useState(1);
+  const [bookingsPerPage] = useState(10);
+
   const router = useRouter();
 
   const checkAuth = useCallback(async () => {
@@ -409,8 +418,8 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setActiveTab('bookings')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'bookings'
-                    ? 'bg-teal-600 text-white shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
               >
                 <CalendarIcon className="w-5 h-5 inline mr-2" />
@@ -419,8 +428,8 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setActiveTab('blogs')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'blogs'
-                    ? 'bg-teal-600 text-white shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
               >
                 <BookOpen className="w-5 h-5 inline mr-2" />
@@ -449,8 +458,8 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setActiveTab('bookings')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'bookings'
-                    ? 'bg-teal-600 text-white shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
               >
                 <CalendarIcon className="w-5 h-5 inline mr-2" />
@@ -459,8 +468,8 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setActiveTab('blogs')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'blogs'
-                    ? 'bg-teal-600 text-white shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
               >
                 <BookOpen className="w-5 h-5 inline mr-2" />
@@ -541,10 +550,94 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Filters and Search */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Search */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Search
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, or phone..."
+                    value={bookingsSearchTerm}
+                    onChange={(e) => {
+                      setBookingsSearchTerm(e.target.value);
+                      setBookingsCurrentPage(1);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={bookingsStatusFilter}
+                    onChange={(e) => {
+                      setBookingsStatusFilter(e.target.value);
+                      setBookingsCurrentPage(1);
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                {/* Sort */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sort By
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={bookingsSortBy}
+                      onChange={(e) => setBookingsSortBy(e.target.value as 'date' | 'name' | 'created')}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    >
+                      <option value="created">Created Date</option>
+                      <option value="date">Appointment Date</option>
+                      <option value="name">Name</option>
+                    </select>
+                    <button
+                      onClick={() => setBookingsSortOrder(bookingsSortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      title={bookingsSortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                    >
+                      {bookingsSortOrder === 'asc' ? '↑' : '↓'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Bookings Table */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">All Bookings</h3>
+                <h3 className="text-lg font-medium text-gray-900">
+                  All Bookings ({(() => {
+                    let filtered = bookings;
+                    if (bookingsStatusFilter !== 'all') {
+                      filtered = filtered.filter(b => b.status === bookingsStatusFilter);
+                    }
+                    if (bookingsSearchTerm) {
+                      const search = bookingsSearchTerm.toLowerCase();
+                      filtered = filtered.filter(b =>
+                        b.name.toLowerCase().includes(search) ||
+                        b.email.toLowerCase().includes(search) ||
+                        b.phone.includes(search)
+                      );
+                    }
+                    return filtered.length;
+                  })()})
+                </h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -568,57 +661,154 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {bookings.map((booking) => (
-                      <tr key={booking.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{booking.name}</div>
-                            <div className="text-sm text-gray-500">{booking.email}</div>
-                            <div className="text-sm text-gray-500">{booking.phone}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{getServiceName(booking.service)}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {new Date(booking.date).toLocaleDateString()}
-                          </div>
-                          <div className="text-sm text-gray-500">{booking.time}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <select
-                              value={booking.status}
-                              onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
-                              className="text-xs border border-gray-300 rounded px-2 py-1"
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="confirmed">Confirmed</option>
-                              <option value="completed">Completed</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      // Filter bookings
+                      let filtered = bookings;
+                      if (bookingsStatusFilter !== 'all') {
+                        filtered = filtered.filter(b => b.status === bookingsStatusFilter);
+                      }
+                      if (bookingsSearchTerm) {
+                        const search = bookingsSearchTerm.toLowerCase();
+                        filtered = filtered.filter(b =>
+                          b.name.toLowerCase().includes(search) ||
+                          b.email.toLowerCase().includes(search) ||
+                          b.phone.includes(search)
+                        );
+                      }
+
+                      // Sort bookings
+                      filtered.sort((a, b) => {
+                        let comparison = 0;
+                        if (bookingsSortBy === 'name') {
+                          comparison = a.name.localeCompare(b.name);
+                        } else if (bookingsSortBy === 'date') {
+                          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+                        } else { // created
+                          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                        }
+                        return bookingsSortOrder === 'asc' ? comparison : -comparison;
+                      });
+
+                      // Paginate
+                      const startIndex = (bookingsCurrentPage - 1) * bookingsPerPage;
+                      const endIndex = startIndex + bookingsPerPage;
+                      const paginatedBookings = filtered.slice(startIndex, endIndex);
+
+                      if (paginatedBookings.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center">
+                              <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
+                              <p className="text-gray-500">
+                                {bookingsSearchTerm || bookingsStatusFilter !== 'all'
+                                  ? 'Try adjusting your filters or search term.'
+                                  : 'Bookings will appear here once customers start making appointments.'}
+                              </p>
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return paginatedBookings.map((booking) => (
+                        <tr key={booking.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{booking.name}</div>
+                              <div className="text-sm text-gray-500">{booking.email}</div>
+                              <div className="text-sm text-gray-500">{booking.phone}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{getServiceName(booking.service)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {new Date(booking.date).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-gray-500">{booking.time}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                              {booking.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <select
+                                value={booking.status}
+                                onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
+                                className="text-xs border border-gray-300 rounded px-2 py-1"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                            </div>
+                          </td>
+                        </tr>
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>
-            </div>
 
-            {bookings.length === 0 && (
-              <div className="text-center py-12">
-                <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings yet</h3>
-                <p className="text-gray-500">Bookings will appear here once customers start making appointments.</p>
-              </div>
-            )}
+              {/* Pagination */}
+              {(() => {
+                let filtered = bookings;
+                if (bookingsStatusFilter !== 'all') {
+                  filtered = filtered.filter(b => b.status === bookingsStatusFilter);
+                }
+                if (bookingsSearchTerm) {
+                  const search = bookingsSearchTerm.toLowerCase();
+                  filtered = filtered.filter(b =>
+                    b.name.toLowerCase().includes(search) ||
+                    b.email.toLowerCase().includes(search) ||
+                    b.phone.includes(search)
+                  );
+                }
+                const totalPages = Math.ceil(filtered.length / bookingsPerPage);
+
+                if (totalPages <= 1) return null;
+
+                return (
+                  <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing {((bookingsCurrentPage - 1) * bookingsPerPage) + 1} to {Math.min(bookingsCurrentPage * bookingsPerPage, filtered.length)} of {filtered.length} results
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setBookingsCurrentPage(Math.max(1, bookingsCurrentPage - 1))}
+                        disabled={bookingsCurrentPage === 1}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setBookingsCurrentPage(page)}
+                          className={`px-3 py-1 border rounded-lg ${page === bookingsCurrentPage
+                            ? 'bg-teal-600 text-white border-teal-600'
+                            : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => setBookingsCurrentPage(Math.min(totalPages, bookingsCurrentPage + 1))}
+                        disabled={bookingsCurrentPage === totalPages}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           </>
         )}
 
@@ -902,8 +1092,8 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${blog.status === 'published' ? 'bg-green-100 text-green-800' :
-                              blog.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
+                            blog.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
                             }`}>
                             {blog.status}
                           </span>
@@ -958,6 +1148,6 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
-    </div>
+    </div >
   );
 }

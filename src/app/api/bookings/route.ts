@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { verifyToken } from '@/lib/auth';
+import { sendBookingStatusEmail } from '@/lib/email';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +19,9 @@ export async function GET(request: NextRequest) {
     if (!payload) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
+
+    // Use service role key to access bookings
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data: bookings, error } = await supabase
       .from('bookings')
@@ -52,13 +59,45 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID and status are required' }, { status: 400 });
     }
 
-    const { error } = await supabase
+    // Use service role key to update bookings
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // First, get the booking details before updating
+    const { data: booking, error: fetchError } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !booking) {
+      throw new Error('Booking not found');
+    }
+
+    // Update the booking status
+    const { error: updateError } = await supabase
       .from('bookings')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id);
 
-    if (error) {
-      throw error;
+    if (updateError) {
+      throw updateError;
+    }
+
+    // Send email notification
+    try {
+      await sendBookingStatusEmail({
+        customerName: booking.name,
+        customerEmail: booking.email,
+        service: booking.service,
+        date: booking.date,
+        time: booking.time,
+        status: status as 'pending' | 'confirmed' | 'completed' | 'cancelled',
+        phone: booking.phone,
+      });
+      console.log(`Email sent to ${booking.email} for status: ${status}`);
+    } catch (emailError) {
+      // Log email error but don't fail the request
+      console.error('Failed to send email notification:', emailError);
     }
 
     return NextResponse.json({ success: true });

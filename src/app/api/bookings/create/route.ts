@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { sendBookingStatusEmail } from '@/lib/email';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,6 +12,9 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !phone || !service || !date || !time) {
       return NextResponse.json({ error: 'All required fields must be filled' }, { status: 400 });
     }
+
+    // Use service role key to bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data, error } = await supabase
       .from('bookings')
@@ -28,6 +35,23 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       throw error;
+    }
+
+    // Send confirmation email
+    try {
+      await sendBookingStatusEmail({
+        customerName: name,
+        customerEmail: email,
+        service,
+        date,
+        time,
+        status: 'pending',
+        phone,
+      });
+      console.log(`Booking confirmation email sent to ${email}`);
+    } catch (emailError) {
+      // Log email error but don't fail the booking
+      console.error('Failed to send confirmation email:', emailError);
     }
 
     return NextResponse.json({
