@@ -284,7 +284,7 @@ export default function AdminDashboard() {
       content: blog.content,
       featured_image: blog.featured_image || '',
       category: blog.category,
-      tags: blog.tags.join(', '),
+      tags: blog.tags ? blog.tags.join(', ') : '',
       status: blog.status,
       author: blog.author
     });
