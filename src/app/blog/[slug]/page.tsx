@@ -223,7 +223,7 @@ export default function BlogPostPage({ params }: BlogPageProps) {
               <div
                 className="text-gray-700 leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: blog.content.replace(/\n/g, '<br />')
+                  __html: blog.content
                 }}
               />
             </div>

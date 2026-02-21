@@ -52,15 +52,9 @@ export default function HomePage() {
 
         {/* Content */}
         <div className="relative z-20 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            {hero.heading || 'Mobile IV Vitamin Therapy Service'}
-          </h1>
-          <h2 className="text-2xl md:text-3xl font-light mb-8 text-teal-200">
-            {hero.subheading || 'Bespoke IV drips - Delivered in comfort'}
-          </h2>
-          <p className="text-xl mb-8 text-gray-200 max-w-2xl mx-auto">
-            {hero.description || 'Welcome to Wellness IV Drip Canberra. Need to have a drip today? Book in for a free consultation with our nurses.'}
-          </p>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight" dangerouslySetInnerHTML={{ __html: hero.heading || 'Mobile IV Vitamin Therapy Service' }} />
+          <h2 className="text-2xl md:text-3xl font-light mb-8 text-teal-200" dangerouslySetInnerHTML={{ __html: hero.subheading || 'Bespoke IV drips - Delivered in comfort' }} />
+          <div className="text-xl mb-8 text-gray-200 max-w-2xl mx-auto" dangerouslySetInnerHTML={{ __html: hero.description || 'Welcome to Wellness IV Drip Canberra. Need to have a drip today? Book in for a free consultation with our nurses.' }} />
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={hero.cta_primary?.link || "/booking"}
@@ -81,12 +75,8 @@ export default function HomePage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              {servicesIntro.title || 'Our Services'}
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {servicesIntro.description || 'We offer a comprehensive range of mobile IV infusion services tailored to meet your unique wellness needs.'}
-            </p>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: servicesIntro.title || 'Our Services' }} />
+            <div className="text-xl text-gray-600 max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: servicesIntro.description || 'We offer a comprehensive range of mobile IV infusion services tailored to meet your unique wellness needs.' }} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -95,9 +85,9 @@ export default function HomePage() {
                 key={index}
                 className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
               >
-                <div className="text-4xl mb-4">{service.icon}</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{service.title}</h3>
-                <p className="text-gray-600 mb-6">{service.description}</p>
+                <div className="text-4xl mb-4" dangerouslySetInnerHTML={{ __html: service.icon }} />
+                <h3 className="text-2xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: service.title }} />
+                <div className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: service.description }} />
                 <Link
                   href="/services"
                   className="inline-flex items-center text-teal-500 font-semibold hover:text-teal-600 transition-colors"
@@ -116,28 +106,22 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {aboutSummary.title || 'About Us'}
-              </h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6" dangerouslySetInnerHTML={{ __html: aboutSummary.title || 'About Us' }} />
               {(aboutSummary.content || []).map((paragraph: string, idx: number) => (
-                <p key={idx} className="text-lg text-gray-600 mb-6">
-                  {paragraph}
-                </p>
+                <div key={idx} className="text-lg text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: paragraph }} />
               ))}
 
               {(aboutSummary.qualifications || []).map((qual: string, idx: number) => (
                 <div key={idx} className="flex items-center space-x-4 mt-2">
                   <CheckCircle className="w-6 h-6 text-teal-500" />
-                  <span className="text-gray-700 font-semibold">{qual}</span>
+                  <div className="text-gray-700 font-semibold" dangerouslySetInnerHTML={{ __html: qual }} />
                 </div>
               ))}
             </div>
             <div className="relative">
               <div className="bg-gradient-to-r from-teal-400 to-amber-400 rounded-2xl p-8 text-white">
-                <h3 className="text-2xl font-bold mb-4">{aboutSummary.contact_box?.title || 'Making an appointment'}</h3>
-                <p className="mb-6">
-                  {aboutSummary.contact_box?.description || 'At Wellness IV Drip, we offer a range of mobile IV infusion services...'}
-                </p>
+                <h3 className="text-2xl font-bold mb-4" dangerouslySetInnerHTML={{ __html: aboutSummary.contact_box?.title || 'Making an appointment' }} />
+                <div className="mb-6" dangerouslySetInnerHTML={{ __html: aboutSummary.contact_box?.description || 'At Wellness IV Drip, we offer a range of mobile IV infusion services...' }} />
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <span className="text-2xl">☎️</span>

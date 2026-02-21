@@ -212,7 +212,7 @@ export default function BlogPage() {
 
                       {/* Excerpt */}
                       <p className="text-gray-600 mb-4 line-clamp-3">
-                        {blog.excerpt || blog.content.substring(0, 150) + '...'}
+                        {blog.excerpt || (blog.content ? blog.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...' : '')}
                       </p>
 
                       {/* Tags */}
