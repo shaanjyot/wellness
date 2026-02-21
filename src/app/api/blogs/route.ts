@@ -17,22 +17,32 @@ export interface Blog {
   updated_at: string;
 }
 
+// Create a local supabase Admin instance to bypass RLS for admin operations
+import { createClient } from '@supabase/supabase-js';
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+);
+
 // GET /api/blogs - Fetch all blogs with optional filtering
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const status = searchParams.get('status') || 'published';
+    const status = searchParams.get('status');
     const search = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('blogs')
       .select('*')
-      .eq('status', status)
-      .order('published_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
+    }
 
     if (category && category !== 'all') {
       query = query.eq('category', category);
@@ -87,7 +97,7 @@ export async function POST(request: NextRequest) {
       published_at: status === 'published' ? new Date().toISOString() : null
     };
 
-    const { data: blog, error } = await supabase
+    const { data: blog, error } = await supabaseAdmin
       .from('blogs')
       .insert([blogData])
       .select()

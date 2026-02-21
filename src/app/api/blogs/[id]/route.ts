@@ -40,6 +40,13 @@ export async function GET(
   }
 }
 
+// Create a local supabase Admin instance to bypass RLS for admin operations
+import { createClient } from '@supabase/supabase-js';
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+);
+
 // PUT /api/blogs/[id] - Update a blog
 export async function PUT(
   request: NextRequest,
@@ -80,7 +87,7 @@ export async function PUT(
       updateData.published_at = new Date().toISOString();
     }
 
-    const { data: blog, error } = await supabase
+    const { data: blog, error } = await supabaseAdmin
       .from('blogs')
       .update(updateData)
       .eq('id', parseInt(id))
@@ -107,7 +114,7 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('blogs')
       .delete()
       .eq('id', parseInt(id));

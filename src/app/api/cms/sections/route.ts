@@ -68,3 +68,36 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update section' }, { status: 500 });
   }
 }
+
+// POST /api/cms/sections - Create new section
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { page_id, section_key, title, content, display_order } = body;
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: newSection, error } = await supabaseAdmin
+      .from('page_sections')
+      .insert({
+        page_id,
+        section_key,
+        title,
+        content: content || {},
+        display_order: display_order || 0
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, section: newSection }, { status: 201 });
+  } catch (error: any) {
+    console.error('Error creating section:', error);
+    return NextResponse.json({ error: error.message || 'Failed to create section' }, { status: 500 });
+  }
+}
