@@ -28,6 +28,16 @@ import {
   TableProperties
 } from 'lucide-react';
 import { useState } from 'react';
+import PuckImageField from '@/components/PuckImageField';
+
+// Reusable custom image field with upload + preview
+const imageField = (label: string = "Image") => ({
+  type: "custom" as const,
+  label,
+  render: (props: any) => (
+    <PuckImageField {...props} />
+  )
+});
 
 export const config: any = {
   root: {
@@ -94,14 +104,14 @@ export const config: any = {
               {logo_text}
             </Link>
             <nav role="navigation" aria-label="Main Navigation" className="hidden md:flex space-x-8">
-              {links?.map((link: any, idx: number) => (
-                <Link key={idx} href={link.href} aria-label={link.aria_label || link.label} className="text-gray-600 hover:text-teal-500 font-medium transition-colors">
+              {Array.isArray(links) && links.map((link: any, idx: number) => (
+                <Link key={idx} href={link.href || "#"} aria-label={link.aria_label || link.label} className="text-gray-600 hover:text-teal-500 font-medium transition-colors">
                   {link.label}
                 </Link>
               ))}
             </nav>
             <Link
-              href={cta_href}
+              href={cta_href || "/booking"}
               aria-label={cta_aria_label || cta_text}
               className="bg-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-teal-600 transition-colors focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 outline-none"
             >
@@ -150,10 +160,10 @@ export const config: any = {
               <h2 className="text-xl font-bold mb-4">{company_name}</h2>
               <p className="text-gray-400 mb-6 font-medium">{description}</p>
               <div className="flex space-x-4">
-                {social_links?.map((social: any, idx: number) => (
+                {Array.isArray(social_links) && social_links.map((social: any, idx: number) => (
                   <a
                     key={idx}
-                    href={social.href}
+                    href={social.href || "#"}
                     aria-label={social.aria_label || `Visit our ${social.platform}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -245,7 +255,7 @@ export const config: any = {
         heading: { type: "text" },
         subheading: { type: "text" },
         description: { type: "textarea" },
-        video_src: { type: "text" },
+        video_src: imageField("Background Video/Image"),
         video_aria_label: { type: "text" },
         cta_primary_text: { type: "text" },
         cta_primary_link: { type: "text" },
@@ -354,7 +364,7 @@ export const config: any = {
         return (
           <section className="py-12 max-w-7xl mx-auto px-4" aria-label="Tabbed Content">
             <div role="tablist" className="flex border-b border-gray-200 mb-8 overflow-x-auto">
-              {tabs?.map((tab: any, idx: number) => (
+              {Array.isArray(tabs) && tabs.map((tab: any, idx: number) => (
                 <button
                   key={idx}
                   role="tab"
@@ -368,7 +378,7 @@ export const config: any = {
                 </button>
               ))}
             </div>
-            {tabs?.map((tab: any, idx: number) => (
+            {Array.isArray(tabs) && tabs.map((tab: any, idx: number) => (
               <div
                 key={idx}
                 role="tabpanel"
@@ -393,7 +403,7 @@ export const config: any = {
           arrayFields: {
             title: { type: "text" },
             description: { type: "textarea" },
-            image: { type: "text" },
+            image: imageField("Slide Image"),
             image_alt: { type: "text" },
             link: { type: "text" }
           }
@@ -412,20 +422,22 @@ export const config: any = {
 
         if (!items || items.length === 0) return null;
 
+        const currentItem = items?.[currentIndex] || {};
+
         return (
           <section className="relative h-[500px] w-full overflow-hidden group" aria-roledescription="carousel" aria-label="Promotion Carousel">
             <div
               className="absolute inset-0 bg-cover bg-center transition-all duration-500 ease-in-out"
-              style={{ backgroundImage: `url(${items[currentIndex].image})` }}
+              style={{ backgroundImage: `url(${currentItem.image || ""})` }}
               role="img"
-              aria-label={items[currentIndex].image_alt}
+              aria-label={currentItem.image_alt || "Promotion Image"}
             >
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center px-4">
                 <div className="max-w-3xl text-white">
-                  <h2 className="text-4xl md:text-5xl font-bold mb-4">{items[currentIndex].title}</h2>
-                  <p className="text-xl mb-8 font-medium">{items[currentIndex].description}</p>
-                  {items[currentIndex].link && (
-                    <Link href={items[currentIndex].link} className="inline-block px-8 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors shadow-lg">
+                  <h2 className="text-4xl md:text-5xl font-bold mb-4">{currentItem.title || ""}</h2>
+                  <p className="text-xl mb-8 font-medium">{currentItem.description || ""}</p>
+                  {currentItem.link && (
+                    <Link href={currentItem.link} className="inline-block px-8 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors shadow-lg">
                       Learn More
                     </Link>
                   )}
@@ -447,7 +459,7 @@ export const config: any = {
               <ChevronRight size={32} aria-hidden="true" />
             </button>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-              {items?.map((_: any, idx: number) => (
+              {Array.isArray(items) && items.map((_: any, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
@@ -469,7 +481,7 @@ export const config: any = {
           type: "array",
           getItemSummary: (item: any) => item?.caption || "Image",
           arrayFields: {
-            url: { type: "text" },
+            url: imageField("Gallery Image"),
             caption: { type: "text" },
             alt: { type: "text" }
           }
@@ -488,11 +500,11 @@ export const config: any = {
           <div className="max-w-7xl mx-auto px-4">
             {title && <h2 className="text-3xl font-bold text-center mb-12">{title}</h2>}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images?.map((img: any, idx: number) => (
+              {Array.isArray(images) && images.map((img: any, idx: number) => (
                 <figure key={idx} className="relative group overflow-hidden rounded-xl aspect-square">
-                  <img src={img.url} alt={img.alt || img.caption} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img src={img.url || ""} alt={img.alt || img.caption || "Gallery image"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <figcaption className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <p className="text-white text-sm font-medium">{img.caption}</p>
+                    <p className="text-white text-sm font-medium">{img.caption || ""}</p>
                   </figcaption>
                 </figure>
               ))}
@@ -536,16 +548,16 @@ export const config: any = {
             {caption && <caption className="sr-only">{caption}</caption>}
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {headers?.map((h: any, i: number) => (
-                  <th key={i} scope="col" className="px-6 py-4 text-left text-sm font-bold text-gray-900">{h.text}</th>
+                {Array.isArray(headers) && headers.map((h: any, i: number) => (
+                  <th key={i} scope="col" className="px-6 py-4 text-left text-sm font-bold text-gray-900">{h.text || ""}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {rows?.map((row: any, ri: number) => (
+              {Array.isArray(rows) && rows.map((row: any, ri: number) => (
                 <tr key={ri} className="hover:bg-gray-50 transition-colors">
-                  {row.cells?.map((cell: any, ci: number) => (
-                    <td key={ci} className="px-6 py-4 text-sm text-gray-600 font-medium">{cell.text}</td>
+                  {Array.isArray(row.cells) && row.cells.map((cell: any, ci: number) => (
+                    <td key={ci} className="px-6 py-4 text-sm text-gray-600 font-medium">{cell.text || ""}</td>
                   ))}
                 </tr>
               ))}
@@ -586,7 +598,7 @@ export const config: any = {
               <div className="text-xl text-gray-600 max-w-3xl mx-auto font-medium" dangerouslySetInnerHTML={{ __html: description || "" }} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {services?.map((service: any, index: number) => (
+              {Array.isArray(services) && services.map((service: any, index: number) => (
                 <div
                   key={index}
                   className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col h-full"
@@ -634,11 +646,11 @@ export const config: any = {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 id="about-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-6" dangerouslySetInnerHTML={{ __html: title || "" }} />
-                {content?.map((para: any, idx: number) => (
+                {Array.isArray(content) && content.map((para: any, idx: number) => (
                   <div key={idx} className="text-lg text-gray-600 mb-6 font-medium" dangerouslySetInnerHTML={{ __html: para.paragraph || "" }} />
                 ))}
                 <ul className="space-y-4 mb-8" aria-label="Qualifications">
-                  {qualifications?.map((qual: any, idx: number) => (
+                  {Array.isArray(qualifications) && qualifications.map((qual: any, idx: number) => (
                     <li key={idx} className="flex items-center space-x-4">
                       <CheckCircle className="w-6 h-6 text-teal-500 flex-shrink-0" aria-hidden="true" />
                       <span className="text-gray-700 font-bold" dangerouslySetInnerHTML={{ __html: qual.item || "" }} />

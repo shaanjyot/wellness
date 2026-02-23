@@ -6,10 +6,26 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Admin client for server-side operations (bypasses RLS)
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// Lazy initialization to prevent crashes when this module is imported on the client side
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
+
+export function getSupabaseAdmin() {
+  if (!_supabaseAdmin) {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set. This function can only be called on the server.');
+    }
+    _supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+  }
+  return _supabaseAdmin;
+}
+
+// Backward-compatible export — only use in server-side code
+export const supabaseAdmin = typeof window === 'undefined'
+  ? (() => {
+    try { return getSupabaseAdmin(); } catch { return null as any; }
+  })()
+  : (null as any);
 
 // Database types
 export interface Booking {

@@ -232,77 +232,149 @@ export default function CMSEditor() {
   const puckInitialData = useMemo(() => {
     const existingPuck = sections.find(s => s.section_key === 'puck_data')?.content;
     if (existingPuck && existingPuck.content) {
-      // Ensure every item has a unique ID to satisfy Puck's internal list keys
-      const sanitizedContent = existingPuck.content.map((item: any, idx: number) => ({
-        ...item,
-        id: item.id || `item-${idx}-${Date.now()}`
-      }));
+      // Sanitize: ensure every item has id inside props (Puck v0.21 requirement)
+      const sanitizedContent = (existingPuck.content || []).map((item: any, idx: number) => {
+        const itemId = item.props?.id || item.id?.toString() || `existing-${idx}`;
+        return {
+          type: item.type,
+          props: {
+            ...item.props,
+            id: itemId
+          }
+        };
+      });
       return {
-        ...existingPuck,
         content: sanitizedContent,
         root: existingPuck.root || { props: { title: selectedPage?.title || "" } }
       };
     }
 
-    // Attempt to convert traditional sections to Puck components
+    // Convert traditional sections to Puck components
     const convertedContent = sections
       .filter(s => s.section_key !== 'puck_data')
-      .map(s => {
+      .map((s, sIdx) => {
         const key = s.section_key;
-        const c = s.content;
+        const c = s.content || {};
+        const baseId = `${key}-${s.id || sIdx}`;
 
         if (key === 'hero') {
           return {
             type: "Hero",
             props: {
-              heading: c.heading,
-              subheading: c.subheading,
-              description: c.description,
-              video_src: c.video_src,
-              cta_primary_text: c.cta_primary?.text,
-              cta_primary_link: c.cta_primary?.link
-            },
-            id: `hero-${s.id}`
+              id: baseId,
+              heading: c.heading || "",
+              subheading: c.subheading || "",
+              description: c.description || "",
+              video_src: c.video_src || "/bg-video.mp4",
+              cta_primary_text: c.cta_primary?.text || "Book Now",
+              cta_primary_link: c.cta_primary?.link || "/booking",
+              cta_secondary_text: c.cta_secondary?.text || "Watch Video"
+            }
           };
         }
         if (key === 'services_intro' || key === 'services_list') {
           return {
             type: "Services",
             props: {
-              title: c.title,
-              description: c.description,
-              services: c.services_list?.map((ser: any) => ({
-                icon: ser.icon,
-                title: ser.title,
-                description: ser.description
-              }))
-            },
-            id: `services-${s.id}`
+              id: baseId,
+              title: c.title || "Our Services",
+              description: c.description || "",
+              services: Array.isArray(c.services_list)
+                ? c.services_list.map((ser: any, idx: number) => ({
+                  icon: ser.icon || "💧",
+                  title: ser.title || "Service",
+                  description: ser.description || ""
+                }))
+                : []
+            }
           };
         }
         if (key === 'about_summary') {
           return {
             type: "About",
             props: {
-              title: c.title,
-              content: c.content?.map((p: string) => ({ paragraph: p })),
-              qualifications: c.qualifications?.map((q: string) => ({ item: q })),
-              contact_title: c.contact_box?.title,
-              contact_description: c.contact_box?.description,
-              phone: c.contact_box?.phone,
-              email: c.contact_box?.email
-            },
-            id: `about-${s.id}`
+              id: baseId,
+              title: c.title || "About Us",
+              content: Array.isArray(c.content) ? c.content.map((p: string) => ({ paragraph: p })) : [],
+              qualifications: Array.isArray(c.qualifications) ? c.qualifications.map((q: string) => ({ item: q })) : [],
+              contact_title: c.contact_box?.title || "Contact Us",
+              contact_description: c.contact_box?.description || "",
+              phone: c.contact_box?.phone || "",
+              email: c.contact_box?.email || ""
+            }
+          };
+        }
+        if (key === 'tabs') {
+          return {
+            type: "Tabs",
+            props: {
+              id: baseId,
+              tabs: Array.isArray(c.tabs) ? c.tabs.map((t: any, idx: number) => ({ label: t.label || `Tab ${idx + 1}`, content: t.content || "" })) : []
+            }
+          };
+        }
+        if (key === 'carousel') {
+          return {
+            type: "Carousel",
+            props: {
+              id: baseId,
+              items: Array.isArray(c.items) ? c.items.map((i: any) => ({
+                title: i.title || "",
+                description: i.description || "",
+                image: i.image || "",
+                image_alt: i.image_alt || ""
+              })) : []
+            }
+          };
+        }
+        if (key === 'gallery') {
+          return {
+            type: "Gallery",
+            props: {
+              id: baseId,
+              title: c.title || "Gallery",
+              images: Array.isArray(c.images) ? c.images.map((img: any) => ({
+                url: img.url || "",
+                caption: img.caption || "",
+                alt: img.alt || ""
+              })) : []
+            }
+          };
+        }
+        if (key === 'cta') {
+          return {
+            type: "CallToAction",
+            props: {
+              id: baseId,
+              title: c.title || "",
+              description: c.description || "",
+              button_text: c.button?.text || "Book Now",
+              button_href: c.button?.link || "/booking",
+              theme: c.theme || "accent"
+            }
+          };
+        }
+        if (key === 'table') {
+          return {
+            type: "Table",
+            props: {
+              id: baseId,
+              caption: c.caption || "",
+              headers: Array.isArray(c.headers) ? c.headers.map((h: any) => ({ text: h.text || h })) : [],
+              rows: Array.isArray(c.rows) ? c.rows.map((r: any) => ({
+                cells: Array.isArray(r.cells) ? r.cells.map((cell: any) => ({ text: cell.text || cell })) : []
+              })) : []
+            }
           };
         }
 
         return {
           type: "SectionHeader",
           props: {
+            id: baseId,
             title: s.title || key,
-            subtitle: typeof c === 'string' ? c : JSON.stringify(c).substring(0, 100)
-          },
-          id: `header-${s.id}`
+            subtitle: typeof c === 'string' ? c : (c.subtitle || JSON.stringify(c).substring(0, 50))
+          }
         };
       })
       .filter(Boolean);

@@ -35,10 +35,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate unique filename
+    const folder = (formData.get('folder') as string) || 'blog-images';
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const fileExtension = file.name.split('.').pop();
-    const fileName = `blog-images/${timestamp}-${randomString}.${fileExtension}`;
+    const fileName = `${folder}/${timestamp}-${randomString}.${fileExtension}`;
 
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
@@ -55,9 +56,9 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error uploading file:', error);
-      return NextResponse.json({ 
-        error: 'Failed to upload file', 
-        details: error.message 
+      return NextResponse.json({
+        error: 'Failed to upload file',
+        details: error.message
       }, { status: 500 });
     }
 

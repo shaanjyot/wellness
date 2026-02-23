@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,10 +32,17 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Fetch settings for scripts
-  const { data: settings } = await supabaseAdmin
-    .from('site_settings')
-    .select('*')
-    .single();
+  let settings: any = null;
+  try {
+    const { data } = await getSupabaseAdmin()
+      .from('site_settings')
+      .select('*')
+      .single();
+    settings = data;
+  } catch (e) {
+    // Settings fetch failed - continue rendering without injected scripts
+    console.error('Failed to fetch site settings:', e);
+  }
 
   return (
     <html lang="en">
