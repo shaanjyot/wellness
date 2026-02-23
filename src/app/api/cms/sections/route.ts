@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // GET /api/cms/sections?pageId=123
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Page ID required' }, { status: 400 });
     }
 
-    const { data: sections, error } = await supabase
+    const { data: sections, error } = await supabaseAdmin
       .from('page_sections')
       .select('*')
       .eq('page_id', pageId)
@@ -36,23 +36,6 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Section ID and Content required' }, { status: 400 });
     }
 
-    // Since we're using the client-side supabase in API routes (which usually uses ANON key),
-    // this would be blocked by RLS for updates unless we use the SERVICE ROLE key.
-    // However, the user's setup imports `supabase` from `@/lib/supabase` which is ANON key.
-    // The admin dashboard is client-side, but API routes run on server.
-    // We should ideally use the service-role client for updates if the user is authenticated as admin.
-
-    // For now, let's assume the request comes from an authenticated admin via middleware/token check.
-    // But since `supabase` client is initialized with ANON key globally in `@/lib/supabase`,
-    // we need to instantiate a service-role client here for writes, OR rely on RLS if user is logged in via Supabase Auth.
-    // Given the previous task used custom auth token, let's use the service role client for CMS updates.
-
-    const { createClient } = require('@supabase/supabase-js');
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
     const { data: updatedSection, error } = await supabaseAdmin
       .from('page_sections')
       .update({ content, updated_at: new Date().toISOString() })
@@ -75,12 +58,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { page_id, section_key, title, content, display_order } = body;
 
-    const { createClient } = require('@supabase/supabase-js');
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
     const { data: newSection, error } = await supabaseAdmin
       .from('page_sections')
       .insert({
@@ -99,5 +76,29 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error creating section:', error);
     return NextResponse.json({ error: error.message || 'Failed to create section' }, { status: 500 });
+  }
+}
+
+// DELETE /api/cms/sections - Delete a section
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Section ID required' }, { status: 400 });
+    }
+
+    const { error } = await supabaseAdmin
+      .from('page_sections')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error deleting section:', error);
+    return NextResponse.json({ error: error.message || 'Failed to delete section' }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Calendar as CalendarIcon, Clock, CheckCircle, XCircle, BookOpen, Plus, Edit, Trash2, Eye as ViewIcon, Upload, X, MessageSquare } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, CheckCircle, XCircle, BookOpen, Plus, Edit, Trash2, Eye as ViewIcon, Upload, X, MessageSquare, Settings } from 'lucide-react';
 import RichTextEditor from '@/components/RichTextEditor';
 
 interface Blog {
@@ -58,8 +58,15 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'bookings' | 'blogs' | 'contact'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'blogs' | 'contact' | 'settings'>('bookings');
+  const [siteSettings, setSiteSettings] = useState({
+    header_scripts: '',
+    footer_scripts: '',
+    google_ads_client: ''
+  });
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [showBlogForm, setShowBlogForm] = useState(false);
+  const [blogFormError, setBlogFormError] = useState('');
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [blogForm, setBlogForm] = useState({
     title: '',
@@ -98,6 +105,7 @@ export default function AdminDashboard() {
         fetchBookings();
         fetchBlogs();
         fetchContactSubmissions();
+        fetchSettings();
       } else {
         setIsAuthenticated(false);
       }
@@ -179,6 +187,39 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/cms/settings');
+      if (response.ok) {
+        const data = await response.json();
+        setSiteSettings(data.settings);
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      const response = await fetch('/api/cms/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(siteSettings)
+      });
+      if (response.ok) {
+        alert('Settings saved successfully!');
+      } else {
+        throw new Error('Failed to save settings');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Error saving settings');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   const updateBookingStatus = async (id: number, status: string) => {
     try {
       const response = await fetch('/api/bookings', {
@@ -196,6 +237,22 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to update booking status:', error);
+    }
+  };
+
+  const deleteBooking = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this booking?')) return;
+
+    try {
+      const response = await fetch(`/api/bookings?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setBookings(bookings.filter(booking => booking.id !== id));
+      }
+    } catch (error) {
+      console.error('Failed to delete booking:', error);
     }
   };
 
@@ -237,6 +294,18 @@ export default function AdminDashboard() {
 
   const handleBlogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBlogFormError('');
+
+    if (!blogForm.title.trim()) {
+      setBlogFormError('Please enter a valid blog post title.');
+      return;
+    }
+
+    if (!blogForm.content || blogForm.content.trim() === '' || blogForm.content === '<p></p>') {
+      setBlogFormError('Please write some content for your blog post.');
+      return;
+    }
+
     try {
       const tagsArray = blogForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
@@ -288,6 +357,7 @@ export default function AdminDashboard() {
       status: blog.status,
       author: blog.author
     });
+    setBlogFormError('');
     setShowBlogForm(true);
   };
 
@@ -517,8 +587,18 @@ export default function AdminDashboard() {
                   : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
               >
-                <MessageSquare className="w-5 h-5 inline mr-2" />
+                <MessageSquare className="w-5 h-5 inline mr-2" aria-hidden="true" />
                 Contact Submissions
+              </button>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === 'settings'
+                  ? 'bg-teal-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  }`}
+              >
+                <Settings className="w-5 h-5 inline mr-2" aria-hidden="true" />
+                Settings
               </button>
               <button
                 onClick={() => router.push('/secure-access/admin/cms')}
@@ -840,6 +920,13 @@ export default function AdminDashboard() {
                                 <option value="completed">Completed</option>
                                 <option value="cancelled">Cancelled</option>
                               </select>
+                              <button
+                                onClick={() => deleteBooking(booking.id)}
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Delete Booking"
+                              >
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -907,6 +994,80 @@ export default function AdminDashboard() {
           </>
         )}
 
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-8 border-b border-gray-100 bg-gray-50">
+              <h2 className="text-2xl font-bold text-gray-900">Site Settings</h2>
+              <p className="text-gray-500 mt-1">Configure global scripts, SEO, and integration codes.</p>
+            </div>
+
+            <div className="p-8 space-y-8">
+              {/* Scripts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <label className="block">
+                    <span className="text-gray-700 font-bold flex items-center gap-2">
+                      Header Scripts
+                      <span className="text-xs font-normal text-gray-400 font-medium">(Google Ads, Facebook Pixel, etc.)</span>
+                    </span>
+                    <textarea
+                      value={siteSettings.header_scripts}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, header_scripts: e.target.value })}
+                      className="mt-2 block w-full rounded-xl border-gray-200 shadow-sm focus:border-teal-500 focus:ring-teal-500 h-48 font-mono text-sm p-4 bg-gray-50"
+                      placeholder="<!-- Paste scripts here to be injected into <head> -->"
+                    />
+                  </label>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block">
+                    <span className="text-gray-700 font-bold flex items-center gap-2">
+                      Footer Scripts
+                      <span className="text-xs font-normal text-gray-400 font-medium">(Live Chat, Tracking, etc.)</span>
+                    </span>
+                    <textarea
+                      value={siteSettings.footer_scripts}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, footer_scripts: e.target.value })}
+                      className="mt-2 block w-full rounded-xl border-gray-200 shadow-sm focus:border-teal-500 focus:ring-teal-500 h-48 font-mono text-sm p-4 bg-gray-50"
+                      placeholder="<!-- Paste scripts here to be injected before </body> -->"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Marketing Tools */}
+              <div className="pt-8 border-t border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">Marketing Tools</h3>
+                <div className="max-w-md space-y-4">
+                  <label className="block">
+                    <span className="text-gray-700 font-bold">Google Ads Client ID</span>
+                    <input
+                      type="text"
+                      value={siteSettings.google_ads_client}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, google_ads_client: e.target.value })}
+                      className="mt-2 block w-full rounded-xl border-gray-200 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-3 bg-gray-50"
+                      placeholder="ca-pub-XXXXXXXXXXXXXXXX"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-8 border-t border-gray-100 flex justify-end">
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={isSavingSettings}
+                  className={`flex items-center gap-2 px-8 py-3 bg-teal-600 text-white rounded-xl font-bold shadow-lg transition-all hover:bg-teal-700 transform hover:-translate-y-0.5 ${isSavingSettings ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <CheckCircle size={20} />
+                  {isSavingSettings ? 'Saving Changes...' : 'Save Site Settings'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Blogs Tab */}
         {activeTab === 'blogs' && (
           <>
@@ -928,6 +1089,7 @@ export default function AdminDashboard() {
                     status: 'draft',
                     author: 'Admin'
                   });
+                  setBlogFormError('');
                   setShowBlogForm(true);
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
@@ -947,12 +1109,20 @@ export default function AdminDashboard() {
                         {editingBlog ? 'Edit Blog Post' : 'Create New Blog Post'}
                       </h3>
                       <button
+                        type="button"
                         onClick={() => setShowBlogForm(false)}
                         className="text-gray-400 hover:text-gray-600"
                       >
                         <XCircle className="w-6 h-6" />
                       </button>
                     </div>
+
+                    {blogFormError && (
+                      <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
+                        <XCircle className="w-5 h-5 flex-shrink-0" />
+                        <p>{blogFormError}</p>
+                      </div>
+                    )}
 
                     <form onSubmit={handleBlogSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

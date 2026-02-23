@@ -6,6 +6,7 @@ import { ArrowRight, Play, CheckCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { usePageContent } from '@/hooks/usePageContent';
+import PuckRenderer from '@/components/PuckRenderer';
 
 export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -25,6 +26,9 @@ export default function HomePage() {
     );
   }
 
+  // Check if we have Puck data
+  const puckData = content?.sections?.['puck_data'];
+
   // Fallback defaults or use fetched content
   const hero = content?.sections?.['hero'] || {};
   const servicesIntro = content?.sections?.['services_intro'] || {};
@@ -35,154 +39,160 @@ export default function HomePage() {
     <div className="min-h-screen">
       <Header />
 
-      {/* Hero Section with Video Background */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          loop
-          muted
-          playsInline
-        >
-          <source src={hero.video_src || "/bg-video.mp4"} type="video/mp4" />
-        </video>
-
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40 z-10"></div>
-
-        {/* Content */}
-        <div className="relative z-20 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight" dangerouslySetInnerHTML={{ __html: hero.heading || 'Mobile IV Vitamin Therapy Service' }} />
-          <h2 className="text-2xl md:text-3xl font-light mb-8 text-teal-200" dangerouslySetInnerHTML={{ __html: hero.subheading || 'Bespoke IV drips - Delivered in comfort' }} />
-          <div className="text-xl mb-8 text-gray-200 max-w-2xl mx-auto" dangerouslySetInnerHTML={{ __html: hero.description || 'Welcome to Wellness IV Drip Canberra. Need to have a drip today? Book in for a free consultation with our nurses.' }} />
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href={hero.cta_primary?.link || "/booking"}
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-teal-500 to-amber-500 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-amber-600 transition-all duration-200 transform hover:scale-105"
+      {puckData ? (
+        <PuckRenderer data={puckData} />
+      ) : (
+        <>
+          {/* Hero Section with Video Background */}
+          <section className="relative h-screen flex items-center justify-center overflow-hidden">
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+              loop
+              muted
+              playsInline
             >
-              {hero.cta_primary?.text || 'Book an appointment'}
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-            <button className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-gray-900 transition-all duration-200">
-              <Play className="mr-2 w-5 h-5" />
-              {hero.cta_secondary?.text || 'Watch Video'}
-            </button>
-          </div>
-        </div>
-      </section>
+              <source src={hero.video_src || "/bg-video.mp4"} type="video/mp4" />
+            </video>
 
-      {/* Services Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: servicesIntro.title || 'Our Services' }} />
-            <div className="text-xl text-gray-600 max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: servicesIntro.description || 'We offer a comprehensive range of mobile IV infusion services tailored to meet your unique wellness needs.' }} />
-          </div>
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/40 z-10"></div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {(servicesIntro.services_list || []).map((service: any, index: number) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-              >
-                <div className="text-4xl mb-4" dangerouslySetInnerHTML={{ __html: service.icon }} />
-                <h3 className="text-2xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: service.title }} />
-                <div className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: service.description }} />
+            {/* Content */}
+            <div className="relative z-20 text-center text-white max-w-4xl mx-auto px-4">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight" dangerouslySetInnerHTML={{ __html: hero.heading || 'Mobile IV Vitamin Therapy Service' }} />
+              <h2 className="text-2xl md:text-3xl font-light mb-8 text-teal-200" dangerouslySetInnerHTML={{ __html: hero.subheading || 'Bespoke IV drips - Delivered in comfort' }} />
+              <div className="text-xl mb-8 text-gray-200 max-w-2xl mx-auto" dangerouslySetInnerHTML={{ __html: hero.description || 'Welcome to Wellness IV Drip Canberra. Need to have a drip today? Book in for a free consultation with our nurses.' }} />
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/services"
-                  className="inline-flex items-center text-teal-500 font-semibold hover:text-teal-600 transition-colors"
+                  href={hero.cta_primary?.link || "/booking"}
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-teal-500 to-amber-500 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-amber-600 transition-all duration-200 transform hover:scale-105"
                 >
-                  Learn More
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                  {hero.cta_primary?.text || 'Book an appointment'}
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6" dangerouslySetInnerHTML={{ __html: aboutSummary.title || 'About Us' }} />
-              {(aboutSummary.content || []).map((paragraph: string, idx: number) => (
-                <div key={idx} className="text-lg text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: paragraph }} />
-              ))}
-
-              {(aboutSummary.qualifications || []).map((qual: string, idx: number) => (
-                <div key={idx} className="flex items-center space-x-4 mt-2">
-                  <CheckCircle className="w-6 h-6 text-teal-500" />
-                  <div className="text-gray-700 font-semibold" dangerouslySetInnerHTML={{ __html: qual }} />
-                </div>
-              ))}
-            </div>
-            <div className="relative">
-              <div className="bg-gradient-to-r from-teal-400 to-amber-400 rounded-2xl p-8 text-white">
-                <h3 className="text-2xl font-bold mb-4" dangerouslySetInnerHTML={{ __html: aboutSummary.contact_box?.title || 'Making an appointment' }} />
-                <div className="mb-6" dangerouslySetInnerHTML={{ __html: aboutSummary.contact_box?.description || 'At Wellness IV Drip, we offer a range of mobile IV infusion services...' }} />
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">☎️</span>
-                    <span>{aboutSummary.contact_box?.phone || '0450 480 698'}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">📧</span>
-                    <span>{aboutSummary.contact_box?.email || 'admin@wellnessivdrip.com.au'}</span>
-                  </div>
-                </div>
+                <button className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-gray-900 transition-all duration-200">
+                  <Play className="mr-2 w-5 h-5" />
+                  {hero.cta_secondary?.text || 'Watch Video'}
+                </button>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              {howItWorks.title || 'How our IV Drips work'}
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {howItWorks.description || 'A simple, streamlined process designed for your comfort and convenience.'}
-            </p>
-          </div>
+          {/* Services Section */}
+          <section className="py-20 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: servicesIntro.title || 'Our Services' }} />
+                <div className="text-xl text-gray-600 max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: servicesIntro.description || 'We offer a comprehensive range of mobile IV infusion services tailored to meet your unique wellness needs.' }} />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {(howItWorks.steps || []).map((step: any, index: number) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {(servicesIntro.services_list || []).map((service: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                  >
+                    <div className="text-4xl mb-4" dangerouslySetInnerHTML={{ __html: service.icon }} />
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: service.title }} />
+                    <div className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: service.description }} />
+                    <Link
+                      href="/services"
+                      className="inline-flex items-center text-teal-500 font-semibold hover:text-teal-600 transition-colors"
+                    >
+                      Learn More
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* About Section */}
+          <section className="py-20 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6" dangerouslySetInnerHTML={{ __html: aboutSummary.title || 'About Us' }} />
+                  {(aboutSummary.content || []).map((paragraph: string, idx: number) => (
+                    <div key={idx} className="text-lg text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: paragraph }} />
+                  ))}
+
+                  {(aboutSummary.qualifications || []).map((qual: string, idx: number) => (
+                    <div key={idx} className="flex items-center space-x-4 mt-2">
+                      <CheckCircle className="w-6 h-6 text-teal-500" />
+                      <div className="text-gray-700 font-semibold" dangerouslySetInnerHTML={{ __html: qual }} />
+                    </div>
+                  ))}
+                </div>
+                <div className="relative">
+                  <div className="bg-gradient-to-r from-teal-400 to-amber-400 rounded-2xl p-8 text-white">
+                    <h3 className="text-2xl font-bold mb-4" dangerouslySetInnerHTML={{ __html: aboutSummary.contact_box?.title || 'Making an appointment' }} />
+                    <div className="mb-6" dangerouslySetInnerHTML={{ __html: aboutSummary.contact_box?.description || 'At Wellness IV Drip, we offer a range of mobile IV infusion services...' }} />
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">☎️</span>
+                        <span>{aboutSummary.contact_box?.phone || '0450 480 698'}</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">📧</span>
+                        <span>{aboutSummary.contact_box?.email || 'admin@wellnessivdrip.com.au'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* How It Works Section */}
+          <section className="py-20 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                  {howItWorks.title || 'How our IV Drips work'}
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  {howItWorks.description || 'A simple, streamlined process designed for your comfort and convenience.'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {(howItWorks.steps || []).map((step: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                  >
+                    <div className="text-4xl font-bold text-teal-500 mb-4">{step.number}</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section className="py-20 bg-gradient-to-r from-teal-500 to-amber-500">
+            <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Ready to Experience Premium IV Therapy?
+              </h2>
+              <p className="text-xl text-teal-100 mb-8">
+                Book your consultation today and take the first step towards optimal wellness.
+              </p>
+              <Link
+                href="/booking"
+                className="inline-flex items-center px-8 py-4 bg-white text-teal-600 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105"
               >
-                <div className="text-4xl font-bold text-teal-500 mb-4">{step.number}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{step.title}</h3>
-                <p className="text-gray-600">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-teal-500 to-amber-500">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Experience Premium IV Therapy?
-          </h2>
-          <p className="text-xl text-teal-100 mb-8">
-            Book your consultation today and take the first step towards optimal wellness.
-          </p>
-          <Link
-            href="/booking"
-            className="inline-flex items-center px-8 py-4 bg-white text-teal-600 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105"
-          >
-            Book Now
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Link>
-        </div>
-      </section>
+                Book Now
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </div>
+          </section>
+        </>
+      )}
 
       <Footer />
     </div>
