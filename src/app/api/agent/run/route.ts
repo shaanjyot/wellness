@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
     let pageContext = {};
     if (pageId) {
       const supabase = getSupabaseAdmin();
-      const { data: page } = await supabase.from("pages").select("*").eq("id", pageId).single();
-      const { data: sections } = await supabase.from("sections").select("*").eq("page_id", pageId);
+      const { data: page } = await (supabase.from("pages") as any).select("*").eq("id", pageId).single();
+      const { data: sections } = await (supabase.from("sections") as any).select("*").eq("page_id", pageId);
       pageContext = { page, sections };
     }
 

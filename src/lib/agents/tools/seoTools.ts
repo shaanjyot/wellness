@@ -6,14 +6,13 @@ import { getSupabaseAdmin } from "../../supabase";
 export const updatePageMetadata = tool(
   async ({ pageId, title, description, keywords }) => {
     const supabase = getSupabaseAdmin();
-    const { data, error } = await (supabase
-      .from("pages")
+    const { data, error } = await (supabase.from("pages") as any)
       .update({
         title,
         meta_description: description,
-      } as any)
+      })
       .eq("id", pageId)
-      .select() as any);
+      .select();
 
     if (error) return `Error updating metadata: ${error.message}`;
 
@@ -22,7 +21,7 @@ export const updatePageMetadata = tool(
       agent_name: "SEOAgent",
       action: `Updated metadata for page ${pageId}`,
       diff: { title, description, keywords }
-    } as any);
+    });
 
     return `Successfully updated metadata for page ${pageId}`;
   },

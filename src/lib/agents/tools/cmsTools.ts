@@ -35,11 +35,10 @@ export const getPageContent = tool(
 export const updateSectionContent = tool(
   async ({ sectionId, content }) => {
     const supabase = getSupabaseAdmin();
-    const { data, error } = await (supabase
-      .from("sections")
-      .update({ content } as any)
+    const { data, error } = await (supabase.from("sections") as any)
+      .update({ content })
       .eq("id", sectionId)
-      .select() as any);
+      .select();
 
     if (error) return `Error updating section: ${error.message}`;
 
@@ -67,15 +66,14 @@ export const updateSectionContent = tool(
 export const addSection = tool(
   async ({ pageId, sectionKey, content, orderIndex }) => {
     const supabase = getSupabaseAdmin();
-    const { data, error } = await (supabase
-      .from("sections")
+    const { data, error } = await (supabase.from("sections") as any)
       .insert({
         page_id: pageId,
         section_key: sectionKey,
         content,
         order_index: orderIndex,
-      } as any)
-      .select() as any);
+      })
+      .select();
 
     if (error) return `Error adding section: ${error.message}`;
     return `Successfully added section ${sectionKey} to page ${pageId}`;
@@ -96,11 +94,10 @@ export const addSection = tool(
 export const getSiteContext = tool(
   async () => {
     const supabase = getSupabaseAdmin();
-    const { data } = await (supabase
-      .from("site_context")
+    const { data } = await (supabase.from("site_context") as any)
       .select("*")
       .eq("site_id", "default")
-      .single() as any);
+      .single();
     return JSON.stringify(data || {});
   },
   {
