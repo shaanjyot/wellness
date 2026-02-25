@@ -19,16 +19,26 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
     // Check admin authentication status
     const checkAdminAuth = async () => {
       try {
         const response = await fetch('/api/auth/verify');
         setIsAdminLoggedIn(response.ok);
+        return response.ok;
       } catch (error) {
         setIsAdminLoggedIn(false);
+        return false;
       }
     };
-    checkAdminAuth();
+
+    // Initial check — only start polling if admin is logged in
+    checkAdminAuth().then((isAdmin) => {
+      if (isAdmin) {
+        interval = setInterval(checkAdminAuth, 30000);
+      }
+    });
 
     // Listen for storage events to update auth status when user logs out in another tab
     const handleStorageChange = () => {
@@ -37,12 +47,9 @@ export default function Header() {
 
     window.addEventListener('storage', handleStorageChange);
 
-    // Check auth status periodically
-    const interval = setInterval(checkAdminAuth, 5000);
-
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, []);
 
@@ -57,8 +64,8 @@ export default function Header() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-        ? 'bg-white/95 backdrop-blur-md shadow-lg'
-        : 'bg-transparent'
+      ? 'bg-white/95 backdrop-blur-md shadow-lg'
+      : 'bg-transparent'
       }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -78,8 +85,8 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 className={`font-medium transition-colors duration-200 ${isScrolled
-                    ? 'text-gray-700 hover:text-teal-500'
-                    : 'text-white hover:text-teal-300'
+                  ? 'text-gray-700 hover:text-teal-500'
+                  : 'text-white hover:text-teal-300'
                   }`}
               >
                 {item.label}
@@ -89,8 +96,8 @@ export default function Header() {
               <Link
                 href="/secure-access/admin"
                 className={`font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${isScrolled
-                    ? 'text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg'
-                    : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                  ? 'text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg'
+                  : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm'
                   }`}
               >
                 Admin Dashboard
@@ -120,8 +127,8 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   className={`font-medium transition-colors duration-200 ${isScrolled
-                      ? 'text-gray-700 hover:text-teal-500'
-                      : 'text-white hover:text-teal-300'
+                    ? 'text-gray-700 hover:text-teal-500'
+                    : 'text-white hover:text-teal-300'
                     }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -132,8 +139,8 @@ export default function Header() {
                 <Link
                   href="/secure-access/admin"
                   className={`font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${isScrolled
-                      ? 'text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg'
-                      : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                    ? 'text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg'
+                    : 'text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm'
                     }`}
                   onClick={() => setIsMenuOpen(false)}
                 >

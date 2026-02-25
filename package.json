@@ -10,6 +10,10 @@
     "db:init": "node -e \"require('./src/lib/database.ts').default\""
   },
   "dependencies": {
+    "@langchain/core": "^1.1.27",
+    "@langchain/google-genai": "^2.1.20",
+    "@langchain/langgraph": "^1.1.5",
+    "@langchain/openai": "^1.2.9",
     "@measured/puck": "^0.20.2",
     "@puckeditor/core": "^0.21.1",
     "@supabase/supabase-js": "^2.95.3",
@@ -32,7 +36,8 @@
     "nodemailer": "^8.0.1",
     "react": "19.2.4",
     "react-calendar": "^6.0.0",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

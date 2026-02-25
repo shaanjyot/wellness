@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import Providers from "@/components/Providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,7 +64,9 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} antialiased`}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
         {settings?.footer_scripts && (
           <div dangerouslySetInnerHTML={{ __html: settings.footer_scripts }} />
         )}

@@ -62,7 +62,7 @@ export const config: any = {
       components: ["Hero", "About", "Services"]
     },
     Interactive: {
-      components: ["Tabs", "Carousel", "Gallery", "Table"]
+      components: ["Tabs", "Carousel", "Gallery", "Table", "ReviewGrid", "FaqSection", "PricingTable", "StatsSection"]
     }
   },
   components: {
@@ -675,6 +675,180 @@ export const config: any = {
                 </div>
               </aside>
             </div>
+          </div>
+        </section>
+      )
+    },
+    ReviewGrid: {
+      label: "Reviews",
+      fields: {
+        title: { type: "text" },
+        reviews: {
+          type: "array",
+          getItemSummary: (item: any) => item?.author || "Review",
+          arrayFields: {
+            author: { type: "text" },
+            rating: { type: "number" },
+            text: { type: "textarea" },
+            date: { type: "text" }
+          }
+        }
+      },
+      defaultProps: {
+        title: "Testimonials",
+        reviews: [
+          { author: "Sarah J.", rating: 5, text: "Amazing service! The nurse was so professional.", date: "2 weeks ago" },
+          { author: "Michael R.", rating: 5, text: "Felt better instantly. Highly recommend.", date: "1 month ago" }
+        ]
+      },
+      render: ({ title, reviews }: any) => (
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-4xl font-bold text-center mb-16 underline-gradient">{title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.isArray(reviews) && reviews.map((rev: any, i: number) => (
+                <div key={i} className="bg-gray-50 p-8 rounded-3xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+                  <div className="flex text-amber-400 mb-4">
+                    {Array.from({ length: rev.rating || 5 }).map((_, j) => <span key={j}>★</span>)}
+                  </div>
+                  <p className="text-gray-600 italic mb-6 leading-relaxed">"{rev.text}"</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-gray-900">{rev.author}</span>
+                    <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">{rev.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    },
+    FaqSection: {
+      label: "FAQ",
+      fields: {
+        title: { type: "text" },
+        items: {
+          type: "array",
+          getItemSummary: (item: any) => item?.question || "FAQ Item",
+          arrayFields: {
+            question: { type: "text" },
+            answer: { type: "textarea" }
+          }
+        }
+      },
+      defaultProps: {
+        title: "Frequently Asked Questions",
+        items: [
+          { question: "Is it safe?", answer: "Yes, our nurses are fully qualified." },
+          { question: "How long does it take?", answer: "Usually 45-60 minutes." }
+        ]
+      },
+      render: ({ title, items }: any) => (
+        <section className="py-20 bg-teal-50">
+          <div className="max-w-3xl mx-auto px-4">
+            <h2 className="text-4xl font-bold text-center mb-12 text-teal-900">{title}</h2>
+            <div className="space-y-4">
+              {Array.isArray(items) && items.map((item: any, i: number) => (
+                <details key={i} className="group bg-white rounded-2xl p-6 shadow-sm border border-teal-100">
+                  <summary className="list-none cursor-pointer flex justify-between items-center font-bold text-teal-800">
+                    {item.question}
+                    <ChevronRight size={18} className="group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="mt-4 text-gray-600 leading-relaxed font-medium">
+                    {item.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    },
+    PricingTable: {
+      label: "Pricing",
+      fields: {
+        title: { type: "text" },
+        plans: {
+          type: "array",
+          getItemSummary: (item: any) => item?.name || "Plan",
+          arrayFields: {
+            name: { type: "text" },
+            price: { type: "text" },
+            features: { type: "textarea" },
+            is_popular: { type: "select", options: [{ label: "No", value: "false" }, { label: "Yes", value: "true" }] }
+          }
+        }
+      },
+      defaultProps: {
+        title: "Our Therapy Plans",
+        plans: [
+          { name: "Basic Hydration", price: "$150", features: "Sodium Chloride, 45 mins", is_popular: "false" },
+          { name: "Immunity Boost", price: "$220", features: "Vitamin C, Zinc, 60 mins", is_popular: "true" }
+        ]
+      },
+      render: ({ title, plans }: any) => (
+        <section className="py-20 bg-[#F8FAFC]">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-4xl font-bold text-center mb-16">{title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {Array.isArray(plans) && plans.map((plan: any, i: number) => (
+                <div key={i} className={`relative p-8 rounded-[40px] border flex flex-col transition-all duration-500 hover:scale-105 ${plan.is_popular === "true" ? 'bg-white border-teal-500 shadow-2xl z-10 scale-110' : 'bg-gray-50 border-gray-100'}`}>
+                  {plan.is_popular === "true" && (
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-teal-500/30">
+                      Most Popular
+                    </div>
+                  )}
+                  <h3 className="text-2xl font-black text-gray-900 mb-2">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1 mb-8">
+                    <span className="text-5xl font-black text-teal-600">{plan.price}</span>
+                    <span className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">/ session</span>
+                  </div>
+                  <ul className="space-y-4 mb-10 flex-grow">
+                    {(plan.features || "").split(',').map((f: string, j: number) => (
+                      <li key={j} className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle size={16} className="text-teal-500" />
+                        {f.trim()}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/booking" className={`w-full py-4 rounded-3xl font-black text-center transition-all ${plan.is_popular === "true" ? 'bg-teal-500 text-white shadow-xl shadow-teal-500/20 hover:bg-teal-600' : 'bg-gray-900 text-white hover:bg-gray-800'}`}>
+                    Book Now
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    },
+    StatsSection: {
+      label: "Stats Counter",
+      fields: {
+        items: {
+          type: "array",
+          getItemSummary: (item: any) => item?.label || "Stat",
+          arrayFields: {
+            value: { type: "text" },
+            label: { type: "text" }
+          }
+        }
+      },
+      defaultProps: {
+        items: [
+          { value: "5000+", label: "Happy Clients" },
+          { value: "100%", label: "Satisfaction" },
+          { value: "50+", label: "Qualified Nurses" }
+        ]
+      },
+      render: ({ items }: any) => (
+        <section className="bg-gray-900 py-20">
+          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-12 text-center text-white">
+            {Array.isArray(items) && items.map((item: any, i: number) => (
+              <div key={i}>
+                <p className="text-5xl font-black text-teal-400 mb-2">{item.value}</p>
+                <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">{item.label}</p>
+              </div>
+            ))}
           </div>
         </section>
       )
